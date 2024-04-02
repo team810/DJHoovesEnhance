@@ -1,60 +1,69 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.IO.IO;
+import frc.robot.commands.DriveCommand;
+import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
 
 public class Robot extends LoggedRobot
 {
     private Command autonomousCommand;
-    
-    private RobotContainer robotContainer;
-    
-    
+
+
     @Override
-    public void robotInit() {}
-    
-    
+    public void robotInit() {
+
+        Logger.recordMetadata("ProjectName", "Swerve Test"); // Set a metadata value
+        if (isReal()) {
+            Logger.addDataReceiver(new NT4Publisher());
+        } else {
+            Logger.addDataReceiver(new NT4Publisher());
+        }
+        Logger.start();
+
+        IO.Initialize();
+        DriverStation.silenceJoystickConnectionWarning(true);
+        DrivetrainSubsystem.getInstance();
+    }
+
     @Override
     public void robotPeriodic()
     {
+        readPeriodicInputs();
         CommandScheduler.getInstance().run();
+        writePeriodicInputs();
+
     }
-    
-    
+    public void readPeriodicInputs()
+    {
+        DrivetrainSubsystem.getInstance().readPeriodic();
+    }
+
+    public void writePeriodicInputs()
+    {
+        DrivetrainSubsystem.getInstance().writePeriodic();
+    }
+
     @Override
-    public void disabledInit() {}
-    
-    
-    @Override
-    public void disabledPeriodic() {}
-    
-    
-    @Override
-    public void disabledExit() {}
-    
-    
+    public void teleopPeriodic() {
+
+    }
     @Override
     public void autonomousInit()
     {
-        autonomousCommand = robotContainer.getAutonomousCommand();
+        autonomousCommand = AutoBuilder.getAuto();
         
         if (autonomousCommand != null)
         {
             autonomousCommand.schedule();
         }
     }
-    
-    
-    @Override
-    public void autonomousPeriodic() {}
-    
-    
-    @Override
-    public void autonomousExit() {}
-    
-    
     @Override
     public void teleopInit()
     {
@@ -62,28 +71,6 @@ public class Robot extends LoggedRobot
         {
             autonomousCommand.cancel();
         }
+        CommandScheduler.getInstance().schedule(new DriveCommand());
     }
-    
-    
-    @Override
-    public void teleopPeriodic() {}
-    
-    
-    @Override
-    public void teleopExit() {}
-    
-    
-    @Override
-    public void testInit()
-    {
-        CommandScheduler.getInstance().cancelAll();
-    }
-    
-    
-    @Override
-    public void testPeriodic() {}
-    
-    
-    @Override
-    public void testExit() {}
 }
