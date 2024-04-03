@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Robot;
 import org.littletonrobotics.junction.Logger;
 
@@ -22,6 +23,11 @@ class SwerveModule {
 
     private DrivetrainSubsystem.SpeedMode mode;
     private final SwerveModuleDetails details;
+
+    private double moduleAcceleration; // RPM
+    private double moduleVelocity; // RPM
+    private double lastVelocity;
+    private double lastTimeStamp;
 
     public SwerveModule(SwerveModuleDetails details)
     {
@@ -56,6 +62,10 @@ class SwerveModule {
         state = new SwerveModuleState();
         this.details = details;
         module.setState(new SwerveModuleState(0,new Rotation2d()));
+
+        lastTimeStamp = Timer.getFPGATimestamp();
+        lastVelocity = 0;
+        moduleAcceleration = 0;
     }
 
     public void setIdleMode(CANSparkMax.IdleMode mode)
@@ -66,28 +76,32 @@ class SwerveModule {
     public void readPeriodic()
     {
         module.readPeriodic();
-
         position.distanceMeters = module.getWheelPosition();
         position.angle = module.getWheelAngle();
     }
     public void writePeriodic()
     {
+        double timeDelta = Timer.getFPGATimestamp() - lastTimeStamp;
+        lastTimeStamp = Timer.getFPGATimestamp();
+
         double targetRPM =
                 (state.speedMetersPerSecond / DrivetrainConstants.DISTANCE_PER_REVOLUTION)
                         * 60 * DrivetrainConstants.DRIVE_GEAR_RATIO;
+
+        moduleAcceleration = (targetRPM - lastVelocity) / timeDelta;
+        lastVelocity = targetRPM;
+
         if (!RobotState.isDisabled())
         {
             module.setState(state);
-
             module.setDriveVoltage(
-                    velocityController.calculate(module.getWheelVelocity(), targetRPM) + velocityFF.calculate(targetRPM)
+                    velocityController.calculate(module.getWheelVelocity(), targetRPM) + velocityFF.calculate(targetRPM , moduleAcceleration)
             );
-
-
             module.setSteerVoltage(
                     steerController.calculate(module.getWheelAngle().getRadians(),MathUtil.angleModulus(state.angle.getRadians()))
             );
         }
+        module.writePeriodic();
         Logger.recordOutput("Drivetrain/" + details.module.name() +
                 "/TargetVelocity", targetRPM);
         Logger.recordOutput("Drivetrain/" + details.module.name() +
@@ -96,8 +110,7 @@ class SwerveModule {
                 "/AtAngleSetpoint", steerController.atSetpoint());
         Logger.recordOutput("Drivetrain/" + details.module.name() +
                 "/Error", steerController.getPositionError());
-
-        module.writePeriodic();
+        Logger.recordOutput("Drivetrain/" + details.module.name() + "/TimeDelta", timeDelta);
     }
 
     void setState(SwerveModuleState state)

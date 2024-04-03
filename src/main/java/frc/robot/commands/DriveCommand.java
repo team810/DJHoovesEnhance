@@ -10,7 +10,6 @@ import frc.robot.IO.IO;
 import frc.robot.subsystems.drivetrain.DrivetrainConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 
-
 public class DriveCommand extends Command {
     private final SlewRateLimiter xLimiter;
     private final SlewRateLimiter yLimiter;
@@ -23,6 +22,7 @@ public class DriveCommand extends Command {
 
         addRequirements(DrivetrainSubsystem.getInstance());
     }
+
     @Override
     public void execute() {
         double xInput = -IO.getJoystickValue(Controls.drive_x).get();
@@ -59,6 +59,11 @@ public class DriveCommand extends Command {
                     xInput,
                     thetaInput
                 ));
+    }
+
+    @Override
+    public void initialize() {
+        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.telop);
     }
 
     @Override
