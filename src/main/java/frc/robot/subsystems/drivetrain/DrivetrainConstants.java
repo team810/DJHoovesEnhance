@@ -48,4 +48,6 @@ public class DrivetrainConstants
 
     public static final double NORMAL_ANGULAR_VELOCITY = MAX_ANGULAR_VELOCITY;
     public static final double SLOW_ANGULAR_VELOCITY = MAX_ANGULAR_VELOCITY/2;
+
+    public static final String LimeLightName = "limelight";
 }

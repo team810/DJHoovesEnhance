@@ -1,7 +1,12 @@
 {
   "NTProvider": {
     "types": {
-      "/FMSInfo": "FMSInfo"
+      "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/Drivetrain/PigeonGyro": "Gyro",
+      "/Shuffleboard/Drivetrain/ThetaController": "ProfiledPIDController",
+      "/Shuffleboard/Drivetrain/XController": "PIDController",
+      "/Shuffleboard/Drivetrain/YController": "PIDController",
+      "/SmartDashboard/Command Scheduler": "Scheduler"
     }
   },
   "NetworkTables Info": {

@@ -41,8 +41,8 @@ class SwerveModule {
 
         } else if (Robot.isSimulation()) {
 
-            velocityController = new PIDController(.005,0,0);
-            velocityFF = new SimpleMotorFeedforward(0,.00215,.00022);
+            velocityController = new PIDController(.001,0,0);
+            velocityFF = new SimpleMotorFeedforward(0,.002165,1);
             steerController = new PIDController(15,0,0);
 
             module = new SwerveModuleSim(details);
@@ -95,7 +95,7 @@ class SwerveModule {
         {
             module.setState(state);
             module.setDriveVoltage(
-                    velocityController.calculate(module.getWheelVelocity(), targetRPM) + velocityFF.calculate(targetRPM , moduleAcceleration)
+                    velocityController.calculate(module.getWheelVelocity(), targetRPM) + velocityFF.calculate(targetRPM)
             );
             module.setSteerVoltage(
                     steerController.calculate(module.getWheelAngle().getRadians(),MathUtil.angleModulus(state.angle.getRadians()))

@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.IO.IO;
-import frc.robot.commands.DriveCommand;
+import frc.robot.commands.TelopController;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -15,10 +15,10 @@ public class Robot extends LoggedRobot
 {
     private Command autonomousCommand;
 
+    double lastTime = 0;
 
     @Override
     public void robotInit() {
-
         Logger.recordMetadata("ProjectName", "Swerve Test"); // Set a metadata value
         if (isReal()) {
             Logger.addDataReceiver(new NT4Publisher());
@@ -30,6 +30,10 @@ public class Robot extends LoggedRobot
         IO.Initialize();
         DriverStation.silenceJoystickConnectionWarning(true);
         DrivetrainSubsystem.getInstance();
+        setUseTiming(true);
+        CommandScheduler.getInstance().unregisterAllSubsystems();
+
+        autonomousCommand = AutoBuilder.getAuto();
     }
 
     @Override
@@ -57,8 +61,8 @@ public class Robot extends LoggedRobot
     @Override
     public void autonomousInit()
     {
-        autonomousCommand = AutoBuilder.getAuto();
-        
+
+
         if (autonomousCommand != null)
         {
             autonomousCommand.schedule();
@@ -71,6 +75,7 @@ public class Robot extends LoggedRobot
         {
             autonomousCommand.cancel();
         }
-        CommandScheduler.getInstance().schedule(new DriveCommand());
+        CommandScheduler.getInstance().schedule(new TelopController());
+        
     }
 }
