@@ -83,6 +83,8 @@ class SwerveModuleRev implements SwerveModuleIO {
 		Logger.recordOutput("Drivetrain/"+ details.module.name() +
 				"/SteerTemperature", steer.getMotorTemperature());
 
+		
+
 		Logger.recordOutput("Drivetrain/" + details.module.name() + "/Revolutions",
 				(drive_encoder.getPosition() / DrivetrainConstants.DRIVE_GEAR_RATIO) * (.102 * Math.PI));
 	}

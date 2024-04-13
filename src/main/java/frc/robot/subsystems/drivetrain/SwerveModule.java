@@ -33,9 +33,9 @@ class SwerveModule {
     {
         if (Robot.isReal())
         {
-            velocityController = new PIDController(.005,0,0);
-            velocityFF = new SimpleMotorFeedforward(0,.00215,.00022);
-            steerController = new PIDController(15,0,0);
+            velocityController = new PIDController(.0001,0,0);
+            velocityFF = new SimpleMotorFeedforward(0,.00218,0);
+            steerController = new PIDController(8,0,0);
 
             module = new SwerveModuleRev(details);
 
@@ -43,7 +43,7 @@ class SwerveModule {
 
             velocityController = new PIDController(.001,0,0);
             velocityFF = new SimpleMotorFeedforward(0,.002165,1);
-            steerController = new PIDController(15,0,0);
+            steerController = new PIDController(5,0,0);
 
             module = new SwerveModuleSim(details);
         }else{

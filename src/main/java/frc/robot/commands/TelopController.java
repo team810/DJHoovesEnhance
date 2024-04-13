@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.IO.Controls;
@@ -19,6 +20,8 @@ public class TelopController extends Command {
     private final SlewRateLimiter yLimiter;
     private final SlewRateLimiter thetaLimiter;
 
+    private double invert = 1;
+
     public TelopController() {
         xLimiter = new SlewRateLimiter(DrivetrainConstants.MAX_ACCELERATION);
         yLimiter = new SlewRateLimiter(DrivetrainConstants.MAX_ACCELERATION);
@@ -27,20 +30,23 @@ public class TelopController extends Command {
         addRequirements(DrivetrainSubsystem.getInstance());
     }
 
+
     @Override
     public void execute() {
-        double xInput = -IO.getJoystickValue(Controls.drive_x).get();
-        double yInput = -IO.getJoystickValue(Controls.drive_y).get();
+        double xInput = IO.getJoystickValue(Controls.drive_x).get();
+        double yInput = IO.getJoystickValue(Controls.drive_y).get();
         double thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();
 
-        xInput = xLimiter.calculate(xInput);
-        yInput = yLimiter.calculate(yInput);
+        xInput = xInput * invert;
+        yInput = yInput * invert;
+
+//        xInput = xLimiter.calculate(xInput);
+//        yInput = yLimiter.calculate(yInput);
 
         Translation2d linerVelocityCalc = calcLinearVelocity(xInput, yInput);
 
-        thetaInput = thetaLimiter.calculate(thetaInput);
         thetaInput = MathUtil.applyDeadband(thetaInput, .05);
-        thetaInput = Math.pow(thetaInput, 3);
+        thetaInput = Math.copySign(thetaInput * thetaInput, thetaInput);
 
 
         if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.normal)
@@ -80,6 +86,9 @@ public class TelopController extends Command {
     @Override
     public void initialize() {
         DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.telop);
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+            invert = -1;
+        }
     }
 
     @Override
