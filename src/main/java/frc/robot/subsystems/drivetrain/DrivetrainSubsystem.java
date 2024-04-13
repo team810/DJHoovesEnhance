@@ -301,6 +301,8 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     {
         return this.swerveController.atReference();
     }
+    public ChassisSpeeds getCurrentSpeeds() {return currentSpeeds;}
+
 
     public enum DrivetrainMode
     {

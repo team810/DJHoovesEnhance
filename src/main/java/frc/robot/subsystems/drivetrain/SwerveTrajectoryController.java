@@ -49,6 +49,11 @@ public class SwerveTrajectoryController {
         return ChassisSpeeds.fromFieldRelativeSpeeds(xFF + xFeedback, yFF + yFeedback, thetaFF + -thetaFeedback, currentPose.getRotation());
     }
 
+    public ChassisSpeeds calculate(Pose2d currentPose, double xVelocity,double yVelocity,double thetaVelocity, double x, double y, double heading)
+    {
+        return this.calculate(currentPose, new ChoreoTrajectoryState(0,xVelocity,yVelocity, thetaVelocity, x,y,heading));
+    }
+
     public boolean atReference()
     {
         return xController.atSetpoint() && yController.atSetpoint() && thetaController.atSetpoint();

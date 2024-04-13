@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 
 
-public class TrajectoryCommand extends Command {
+public class ChoreoTrajectoryCommand extends Command {
     private final ChoreoTrajectory trajectory;
     private ChoreoTrajectoryState stateCurrent;
 
@@ -39,7 +39,7 @@ public class TrajectoryCommand extends Command {
         return timer.hasElapsed(trajectory.getTotalTime()) && DrivetrainSubsystem.getInstance().swerveControllerAtReference();
     }
 
-    public TrajectoryCommand(ChoreoTrajectory trajectory)
+    public ChoreoTrajectoryCommand(ChoreoTrajectory trajectory)
     {
         this.timer = new Timer();
         this.trajectory = trajectory;
