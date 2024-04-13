@@ -1,4 +1,16 @@
 {
+  "HALProvider": {
+    "PowerDistributions": {
+      "0": {
+        "PowerDistribution[0]": {
+          "open": true
+        }
+      },
+      "window": {
+        "visible": true
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -6,7 +18,27 @@
       "/Shuffleboard/Drivetrain/ThetaController": "ProfiledPIDController",
       "/Shuffleboard/Drivetrain/XController": "PIDController",
       "/Shuffleboard/Drivetrain/YController": "PIDController",
+      "/Shuffleboard/Swerve/thetaController": "PIDController",
+      "/Shuffleboard/Swerve/xController": "PIDController",
+      "/Shuffleboard/Swerve/yController": "PIDController",
       "/SmartDashboard/Command Scheduler": "Scheduler"
+    },
+    "windows": {
+      "/FMSInfo": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "AdvantageKit": {
+        "open": true
+      },
+      "limelight": {
+        "open": true
+      }
     }
   },
   "NetworkTables Info": {

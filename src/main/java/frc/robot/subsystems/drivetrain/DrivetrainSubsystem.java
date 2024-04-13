@@ -1,8 +1,10 @@
 package frc.robot.subsystems.drivetrain;
 
+import com.choreo.lib.ChoreoTrajectoryState;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.CANSparkBase;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -56,6 +58,9 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     private final ProfiledPIDController headingController;
     private double targetAngle;
     private HeadingControlMode controlMode;
+
+    private final SwerveTrajectoryController swerveController;
+    private ChoreoTrajectoryState trajectoryState;
 
     private double invert = 1;
 
@@ -132,6 +137,14 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
 
         previousWheelPositions = new SwerveDriveWheelPositions(getModulePositions());
         currentWheelPositions = new SwerveDriveWheelPositions(getModulePositions());
+
+        swerveController = new SwerveTrajectoryController(
+                new PIDController(7,0,0),
+                new PIDController(7,0,0),
+                new PIDController(10,0,0)
+        );
+
+        trajectoryState = new ChoreoTrajectoryState(0,0,0,0,0,0,0);
     }
 
     @Override
@@ -192,6 +205,8 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         {
             case trajectory ->
             {
+                targetSpeeds = swerveController.calculate(getRobotPose(), trajectoryState);
+
                 targetSpeeds.vxMetersPerSecond = invert * targetSpeeds.vxMetersPerSecond;
                 targetSpeeds.vyMetersPerSecond = invert * targetSpeeds.vyMetersPerSecond;
                 targetSpeeds.omegaRadiansPerSecond = invert * targetSpeeds.omegaRadiansPerSecond;
@@ -231,11 +246,16 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         Logger.recordOutput("Drivetrain/ModuleStates/Target", frontLeftTargetState, frontRightTargetState, backLeftTargetState, backRightTargetState);
         Logger.recordOutput("Drivetrain/ModuleStates/Current", frontLeft.getState(), frontRight.getState(),backLeft.getState(), backRight.getState());
         Logger.recordOutput("Drivetrain/Current/Speeds", currentSpeeds);
-        Logger.recordOutput("Drivetrain/Current/Twist");
+        Logger.recordOutput("Drivetrain/Current/Twist", currentTwist);
+
+        Logger.recordOutput("Drivetrain/Trajectory/AtReference", swerveControllerAtReference());
+        Logger.recordOutput("Drivetrain/Trajectory/TargetPose", trajectoryState.getPose());
+
         Logger.recordOutput("Drivetrain/SpeedMode", speedMode);
         Logger.recordOutput("Drivetrain/Mode", drivetrainMode);
         Logger.recordOutput("Drivetrain/RobotPose", getRobotPose());
         Logger.recordOutput("Drivetrain/Rotation", getFiledRelativeOrientationOfRobot());
+
     }
 
     private SwerveModulePosition[] getModulePositions() {return new SwerveModulePosition[]{frontLeftPosition, frontRightPosition, backLeftPosition, backRightPosition};}
@@ -274,6 +294,13 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         }
     }
     public SwerveDriveKinematics getKinematics(){return kinematics;}
+    public void setTrajectoryState(ChoreoTrajectoryState trajectoryState) {
+        this.trajectoryState = trajectoryState;
+    }
+    public boolean swerveControllerAtReference()
+    {
+        return this.swerveController.atReference();
+    }
 
     public enum DrivetrainMode
     {

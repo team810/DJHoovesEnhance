@@ -31,11 +31,13 @@ public class Robot extends LoggedRobot
 
         IO.Initialize();
         DriverStation.silenceJoystickConnectionWarning(true);
+
         DrivetrainSubsystem.getInstance();
         setUseTiming(true);
         CommandScheduler.getInstance().unregisterAllSubsystems();
-
+        CommandScheduler.getInstance().setPeriod(.15);
         autonomousCommand = AutoBuilder.getAuto();
+
 
         new Trigger(() -> IO.getButtonValue(Controls.reset_gyro).get()).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().resetGyroButton()));
     }

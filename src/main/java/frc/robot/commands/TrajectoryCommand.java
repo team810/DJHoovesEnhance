@@ -18,13 +18,14 @@ public class TrajectoryCommand extends Command {
     public void initialize() {
         timer.start();
         stateCurrent = trajectory.sample(0,DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red);
-
+        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.trajectory);
+        DrivetrainSubsystem.getInstance().setTrajectoryState(stateCurrent);
     }
 
     @Override
     public void execute() {
         stateCurrent = trajectory.sample(timer.get(), DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red);
-
+        DrivetrainSubsystem.getInstance().setTrajectoryState(stateCurrent);
     }
 
     @Override
@@ -35,7 +36,7 @@ public class TrajectoryCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(trajectory.getTotalTime());
+        return timer.hasElapsed(trajectory.getTotalTime()) && DrivetrainSubsystem.getInstance().swerveControllerAtReference();
     }
 
     public TrajectoryCommand(ChoreoTrajectory trajectory)
