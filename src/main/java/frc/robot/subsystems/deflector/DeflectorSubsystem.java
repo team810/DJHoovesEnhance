@@ -2,32 +2,33 @@ package frc.robot.subsystems.deflector;
 
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.lib.AdvancedSubsystem;
 import frc.robot.lib.MechanismState;
 import org.littletonrobotics.junction.Logger;
 
-public class DeflectorSubsystem extends SubsystemBase {
+public class DeflectorSubsystem extends AdvancedSubsystem {
 
     private static DeflectorSubsystem INSTANCE;
-    private DeflectorIO deflector;
+    private final DeflectorIO deflector;
     private MechanismState deflectorState;
 
     private DeflectorSubsystem() {
-        if (Robot.isReal())
-        {
-            deflector = new DeflectorReal();
-        }else{
-            deflector = new DeflectorSim();
-        }
+        deflector = new DeflectorReal();
+
         deflectorState = MechanismState.stored;
         deflector.setState(DoubleSolenoid.Value.kReverse);
     }
 
     @Override
-    public void periodic() {
+    public void readPeriodic() {
 
+    }
+
+    @Override
+    public void writePeriodic() {
         Logger.recordOutput("Deflector/MechanismState", deflectorState);
+        deflector.writePeriodic();
     }
 
     public MechanismState getDeflectorState() {

@@ -11,14 +11,12 @@ public class ShooterReal implements ShooterIO {
     private final RelativeEncoder topEncoder;
     private final RelativeEncoder bottomEncoder;
 
-    private double topTargetRPM;
-    private double bottomTargetRPM;
-
     private final SparkPIDController topController;
     private final SparkPIDController bottomController;
 
-    public double BottomP, BottomI, BottomD, BottomIz, BottomFF, BottomMaxOutput,BottomMinOutput, BottomMaxRPM;
-    public double TopP, TopI, TopD, TopIz, TopFF, TopMaxOutput, TopMinOutput, TopMaxRPM;
+    private double topTargetRPM;
+    private double bottomTargetRPM;
+
 
     public ShooterReal() {
         topMotor = new CANSparkMax(ShooterConstants.TOP_MOTOR_ID, CANSparkLowLevel.MotorType.kBrushless);
@@ -44,17 +42,6 @@ public class ShooterReal implements ShooterIO {
         topController = topMotor.getPIDController();
         bottomController = bottomMotor.getPIDController();
 
-//
-//        SmartDashboard.putNumber("Top/kP", 0.00006);
-//        SmartDashboard.putNumber("Top/kI", TopI);
-//        SmartDashboard.putNumber("Top/kD", TopD);
-//        SmartDashboard.putNumber("Top/kFF", 0.000185);
-//
-//        SmartDashboard.putNumber("Bottom/kP", 0.00006);
-//        SmartDashboard.putNumber("Bottom/kI", BottomI);
-//        SmartDashboard.putNumber("Bottom/kD", BottomD);
-//        SmartDashboard.putNumber("Bottom/kFF", 0.000185);
-
         topController.setP(0.00006);
         topController.setI(0);
         topController.setD(0);
@@ -67,22 +54,8 @@ public class ShooterReal implements ShooterIO {
 
 
     }
-
     @Override
-    public void update()
-    {
-//        TopP = SmartDashboard.getNumber("Top/kP",0);
-//        TopI = SmartDashboard.getNumber("Top/kI",0);
-//        TopD = SmartDashboard.getNumber("Top/kD", 0);
-//        TopFF = SmartDashboard.getNumber("Top/kFF", 0);
-//
-//        BottomP = SmartDashboard.getNumber("Bottom/kP",0);
-//        BottomI = SmartDashboard.getNumber("Bottom/kI",0);
-//        BottomD = SmartDashboard.getNumber("Bottom/kD", 0);
-//        BottomFF = SmartDashboard.getNumber("Bottom/kFF", 0);
-
-
-
+    public void readPeriodic() {
         Logger.recordOutput("Shooter/Top/CurrentDraw", topMotor.getOutputCurrent());
         Logger.recordOutput("Shooter/Top/Temperature", topMotor.getMotorTemperature());
         Logger.recordOutput("Shooter/Top/Velocity", topEncoder.getVelocity());
@@ -92,8 +65,10 @@ public class ShooterReal implements ShooterIO {
         Logger.recordOutput("Shooter/Bottom/Temperature", bottomMotor.getMotorTemperature());
         Logger.recordOutput("Shooter/Bottom/Velocity", bottomEncoder.getVelocity());
         Logger.recordOutput("Shooter/Bottom/TargetVelocity", bottomTargetRPM);
+    }
 
-
+    @Override
+    public void writePeriodic() {
         topController.setReference(topTargetRPM, CANSparkBase.ControlType.kVelocity);
         bottomController.setReference(bottomTargetRPM, CANSparkBase.ControlType.kVelocity);
 
@@ -113,4 +88,6 @@ public class ShooterReal implements ShooterIO {
     public void setBottomTargetRPM(double targetRPM) {
         this.bottomTargetRPM = targetRPM;
     }
+
+
 }

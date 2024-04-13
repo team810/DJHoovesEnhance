@@ -17,8 +17,6 @@ public class Pneumatics extends SubsystemBase {
     private final PneumaticsControlModule pcm = new PneumaticsControlModule(20);
 
 
-
-
     private Pneumatics() {
         pcm.enableCompressorDigital();
     }

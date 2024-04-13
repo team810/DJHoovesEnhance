@@ -1,19 +1,16 @@
 package frc.robot.subsystems.intake;
 
-
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.lib.AdvancedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeSubsystem extends SubsystemBase {
+public class IntakeSubsystem extends AdvancedSubsystem {
 
     private static IntakeSubsystem INSTANCE = new IntakeSubsystem();
 
     private final IntakeIO intake;
 
     private IntakeStates state;
-
-    private double manualSpeed;
 
     private IntakeSubsystem() {
 
@@ -24,13 +21,24 @@ public class IntakeSubsystem extends SubsystemBase {
         }
 
         state = IntakeStates.off;
-        manualSpeed = 0;
 
     }
 
-    public void periodic() {
+    @Override
+    public void readPeriodic() {
+        intake.readPeriodic();
+    }
+
+    @Override
+    public void writePeriodic() {
+
+        intake.writePeriodic();
+        Logger.recordOutput("Intake State", state.toString());
+    }
 
 
+    public void setState(IntakeStates state) {
+        this.state = state;
         switch (state)
         {
             case fwd -> {
@@ -42,20 +50,10 @@ public class IntakeSubsystem extends SubsystemBase {
             case fire -> {
                 intake.setVoltage(IntakeConstants.INTAKE_SHOOT_SPEED * 12);
             }
-            case manual -> {
-                intake.setVoltage(getManualSpeed() * 12);
-            }
             case off -> {
                 intake.setVoltage(0);
             }
         }
-        intake.update();
-        Logger.recordOutput("Intake State", state.toString());
-
-    }
-
-    public void setState(IntakeStates state) {
-        this.state = state;
     }
 
     public static IntakeSubsystem getInstance() {
@@ -65,12 +63,5 @@ public class IntakeSubsystem extends SubsystemBase {
         return INSTANCE;
     }
 
-    public double getManualSpeed() {
-        return manualSpeed;
-    }
-
-    public void setManualSpeed(double manualSpeed) {
-        this.manualSpeed = manualSpeed;
-    }
 }
 

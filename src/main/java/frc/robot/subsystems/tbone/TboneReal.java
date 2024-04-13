@@ -11,8 +11,6 @@ public class TboneReal implements TBoneIO {
 
     private RelativeEncoder encoder;
 
-
-
     public TboneReal() {
 
         motor = new CANSparkMax(TboneConstants.TBONE_MOTOR_ID,
@@ -44,8 +42,13 @@ public class TboneReal implements TBoneIO {
         motor.set(inputVoltage);
     }
 
-    public void update() {
+    @Override
+    public void readPeriodic() {
 
+    }
+
+    @Override
+    public void writePeriodic() {
         Logger.recordOutput("T-Bone/Position",encoder.getPosition());
         Logger.recordOutput("T-Bone/Voltage", inputVoltage);
 

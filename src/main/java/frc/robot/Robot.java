@@ -9,11 +9,18 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.IO.Controls;
 import frc.robot.IO.IO;
 import frc.robot.commands.*;
+import frc.robot.commands.intake.IntakeFwdCommand;
+import frc.robot.commands.intake.IntakeRevCommand;
+import frc.robot.commands.intake.IntakeSourceCommand;
+import frc.robot.commands.swerve.TelopController;
+import frc.robot.lib.MechanismState;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.deflector.DeflectorSubsystem;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
+import frc.robot.subsystems.intake.IntakeStates;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.laser.LaserSubsystem;
+import frc.robot.subsystems.shooter.ShooterMode;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.tbone.TBoneSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -58,7 +65,6 @@ public class Robot extends LoggedRobot
         new Trigger(() -> IO.getButtonValue(Controls.sourceIntake).get()).whileTrue(new IntakeSourceCommand());
 
         new Trigger(() -> IO.getButtonValue(Controls.fire).get()).whileTrue(new FireCommand());
-//        new Trigger(() -> IO.getButtonValue(Controls.SpeakerScore).get()).whileTrue(new RevShooterTestCommand());
 
         new Trigger(() -> IO.getButtonValue(Controls.AmpScore).get()).whileTrue(new AmpScoreCommand());
         new Trigger(() -> IO.getButtonValue(Controls.revSpeaker).get()).whileTrue(new RevSpeakerCommand());
@@ -84,11 +90,38 @@ public class Robot extends LoggedRobot
     public void readPeriodicInputs()
     {
         DrivetrainSubsystem.getInstance().readPeriodic();
+        ClimberSubsystem.getInstance().readPeriodic();
+        TBoneSubsystem.getInstance().readPeriodic();
+        ShooterSubsystem.getInstance().readPeriodic();
+        IntakeSubsystem.getInstance().readPeriodic();
+        DeflectorSubsystem.getInstance().readPeriodic();
+        LaserSubsystem.getInstance().readPeriodic();
     }
 
     public void writePeriodicInputs()
     {
         DrivetrainSubsystem.getInstance().writePeriodic();
+        ClimberSubsystem.getInstance().writePeriodic();
+        TBoneSubsystem.getInstance().writePeriodic();
+        ShooterSubsystem.getInstance().writePeriodic();
+        IntakeSubsystem.getInstance().writePeriodic();
+        DeflectorSubsystem.getInstance().writePeriodic();
+        LaserSubsystem.getInstance().writePeriodic();
+    }
+
+    @Override
+    public void teleopInit()
+    {
+        if (autonomousCommand != null)
+        {
+            autonomousCommand.cancel();
+        }
+        CommandScheduler.getInstance().schedule(new TelopController());
+
+        TBoneSubsystem.getInstance().setState(MechanismState.stored);
+        ShooterSubsystem.getInstance().setShooterMode(ShooterMode.off);
+        IntakeSubsystem.getInstance().setState(IntakeStates.off);
+        DeflectorSubsystem.getInstance().setDeflectorState(MechanismState.stored);
     }
 
     @Override
@@ -109,14 +142,5 @@ public class Robot extends LoggedRobot
 
     }
 
-    @Override
-    public void teleopInit()
-    {
-        if (autonomousCommand != null)
-        {
-            autonomousCommand.cancel();
-        }
-        CommandScheduler.getInstance().schedule(new TelopController());
-        
-    }
+
 }

@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.swerve;
 
 import com.choreo.lib.ChoreoTrajectory;
 import com.choreo.lib.ChoreoTrajectoryState;

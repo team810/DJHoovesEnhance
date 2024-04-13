@@ -5,9 +5,10 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.lib.AdvancedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class ShooterSubsystem extends SubsystemBase {
+public class ShooterSubsystem extends AdvancedSubsystem {
     private static ShooterSubsystem INSTANCE;
 
     private final ShooterIO shooter;
@@ -40,53 +41,52 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {
-        if (RobotState.isEnabled())
-        {
-            switch (shooterMode)
-            {
-                case SourceIntake -> {
-                    topTargetSpeed = -2000;
-                    bottomTargetSpeed = -2000;
-                }
-                case Amp -> {
-                    topTargetSpeed = 1800;
-                    bottomTargetSpeed = 1800;
-                }
-                case Tape -> {
-                    topTargetSpeed = targetTopTestRPM;
-                    bottomTargetSpeed = targetBottomTestRPM;
-                }
-                case Subwoofer -> {
-                    topTargetSpeed = 3500;
-                    bottomTargetSpeed = 3500;
-                }
-                case test -> {
-                    topTargetSpeed = targetTopTestRPM;
-                    bottomTargetSpeed = targetBottomTestRPM;
-                }
-                case off -> {
-                    topTargetSpeed = 0;
-                    bottomTargetSpeed = 0;
-                }
-            }
-        }else{
-            topTargetSpeed = 0;
-            bottomTargetSpeed = 0;
-        }
+    public void readPeriodic() {
+        shooter.readPeriodic();
+    }
 
-        shooter.setTopTargetRPM(topTargetSpeed);
-        shooter.setBottomTargetRPM(bottomTargetSpeed);
-
+    @Override
+    public void writePeriodic() {
         Logger.recordOutput("Shooter/Top/TargetSpeedSub", topTargetSpeed);
         Logger.recordOutput("Shooter/Bottom/TargetSpeedSub", bottomTargetSpeed);
         Logger.recordOutput("Shooter/Mode/ShooterMode", shooterMode);
 
-        shooter.update();
+        shooter.writePeriodic();
     }
 
     public void setShooterMode(ShooterMode shooterMode) {
         this.shooterMode = shooterMode;
+
+        switch (shooterMode)
+        {
+            case SourceIntake -> {
+                topTargetSpeed = -2000;
+                bottomTargetSpeed = -2000;
+            }
+            case Amp -> {
+                topTargetSpeed = 1800;
+                bottomTargetSpeed = 1800;
+            }
+            case Tape -> {
+                topTargetSpeed = 4000;
+                bottomTargetSpeed = 2000;
+            }
+            case Subwoofer -> {
+                topTargetSpeed = 3500;
+                bottomTargetSpeed = 3500;
+            }
+            case test -> {
+                topTargetSpeed = targetTopTestRPM;
+                bottomTargetSpeed = targetBottomTestRPM;
+            }
+            case off -> {
+                topTargetSpeed = 0;
+                bottomTargetSpeed = 0;
+            }
+        }
+
+        shooter.setTopTargetRPM(topTargetSpeed);
+        shooter.setBottomTargetRPM(bottomTargetSpeed);
     }
 
 

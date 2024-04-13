@@ -3,7 +3,8 @@ package frc.robot.subsystems.climber;
 public interface ClimberIO {
 
     void setVoltage(double voltage);
-    void update();
+    void readPeriodic();
+    void writePeriodic();
     void release();
 
     void pin();

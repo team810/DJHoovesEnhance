@@ -3,8 +3,9 @@ package frc.robot.subsystems.climber;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.lib.AdvancedSubsystem;
 
-public class ClimberSubsystem extends SubsystemBase {
+public class ClimberSubsystem extends AdvancedSubsystem {
 
     private static ClimberSubsystem INSTANCE = new ClimberSubsystem();
 
@@ -21,17 +22,17 @@ public class ClimberSubsystem extends SubsystemBase {
 
     private ClimberSubsystem() {
 
-        if (Robot.isReal()) {
-            climber = new ClimberReal();
-        } else {
-            climber = new ClimberSim();
-        }
-
+        climber = new ClimberReal();
         state = ClimberStates.off;
     }
 
-    public void periodic() {
+    @Override
+    public void readPeriodic() {
+        climber.readPeriodic();
+    }
 
+    @Override
+    public void writePeriodic() {
         switch (state)
         {
             case down -> {
@@ -44,7 +45,7 @@ public class ClimberSubsystem extends SubsystemBase {
                 climber.setVoltage(0);
             }
         }
-        climber.update();
+        climber.writePeriodic();
     }
 
     public void releaseClimber()

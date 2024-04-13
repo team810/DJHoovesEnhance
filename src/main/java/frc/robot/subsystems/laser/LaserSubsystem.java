@@ -2,15 +2,15 @@ package frc.robot.subsystems.laser;
 
 import au.grapplerobotics.LaserCan;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.lib.AdvancedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class LaserSubsystem extends SubsystemBase {
+public class LaserSubsystem extends AdvancedSubsystem {
     private static LaserSubsystem INSTANCE;
 
     private final LaserCan sensor;
-    double distance = 0; // Distance Measurement form sensor in mm
+    double distance = 0;
 
     private LaserState state;
 
@@ -37,7 +37,7 @@ public class LaserSubsystem extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {
+    public void readPeriodic() {
         if (Robot.isReal())
         {
             distance = sensor.getMeasurement().distance_mm;
@@ -50,7 +50,10 @@ public class LaserSubsystem extends SubsystemBase {
         }else{
             state = LaserState.Undetected;
         }
+    }
 
+    @Override
+    public void writePeriodic() {
         Logger.recordOutput("LaserSensor/Distance", distance);
         Logger.recordOutput("LaserSensor/State", state);
     }

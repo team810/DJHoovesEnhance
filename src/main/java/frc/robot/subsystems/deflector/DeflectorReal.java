@@ -17,7 +17,7 @@ public class DeflectorReal implements DeflectorIO{
     }
 
     @Override
-    public void update() {
+    public void writePeriodic() {
         Logger.recordOutput("Deflector/SolenoidValue", deflector.get());
     }
 }

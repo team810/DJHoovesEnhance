@@ -40,12 +40,17 @@ public class ClimberReal implements ClimberIO {
 
     }
 
-    public void update() {
+    @Override
+    public void readPeriodic() {
+
+    }
+
+    @Override
+    public void writePeriodic() {
         Logger.recordOutput("Climber/Temperature", climberMotor.getMotorTemperature());
         Logger.recordOutput("Climber/CurrentDraw", climberMotor.getOutputCurrent());
         Logger.recordOutput("Climber/motorVoltage", climberMotor.getBusVoltage());
         Logger.recordOutput("Climber/inputVoltage", this.inputVoltage);
-
         Logger.recordOutput("Climber/ReleasePiston", releasePiston.get());
     }
 

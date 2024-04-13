@@ -44,7 +44,13 @@ public class IntakeReal implements IntakeIO {
         bottomMotor.set(inputVoltage);
     }
 
-    public void update() {
+    @Override
+    public void readPeriodic() {
+
+    }
+
+    @Override
+    public void writePeriodic() {
         Logger.recordOutput("Intake/Top/Temperature", topMotor.getMotorTemperature());
         Logger.recordOutput("Intake/Top/CurrentDraw", topMotor.getOutputCurrent());
         Logger.recordOutput("Intake/Top/MotorVoltage", topMotor.getBusVoltage());

@@ -6,15 +6,12 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.lib.AdvancedSubsystem;
 import frc.robot.lib.MechanismState;
 import org.littletonrobotics.junction.Logger;
 
-public class TBoneSubsystem extends SubsystemBase {
+public class TBoneSubsystem extends AdvancedSubsystem {
     private static TBoneSubsystem INSTANCE;
-    public static TBoneSubsystem getInstance() {
-        if (INSTANCE == null) { INSTANCE = new TBoneSubsystem(); }
-        return INSTANCE;
-    }
     private final TBoneIO tBone;
 
     private MechanismState state;
@@ -23,19 +20,19 @@ public class TBoneSubsystem extends SubsystemBase {
     private double setpoint;
 
     private TBoneSubsystem() {
-        if (Robot.isReal())
-        {
-            tBone = new TboneReal();
-        }else{
-            tBone = new TBoneSim();
-        }
+        tBone = new TboneReal();
+
         controller.setTolerance(0);
         setState(MechanismState.stored);
     }
 
     @Override
-    public void periodic() {
+    public void readPeriodic() {
+        tBone.readPeriodic();
+    }
 
+    @Override
+    public void writePeriodic() {
         if (RobotState.isEnabled())
         {
             if (state == MechanismState.stored)
@@ -57,8 +54,7 @@ public class TBoneSubsystem extends SubsystemBase {
 
         Logger.recordOutput("T-Bone/Setpoint", setpoint);
         Logger.recordOutput("T-Bone/AtSetpoint", controller.atSetpoint());
-
-        tBone.update();
+        tBone.writePeriodic();
     }
 
     public MechanismState getState() {
@@ -84,6 +80,10 @@ public class TBoneSubsystem extends SubsystemBase {
         } else {
             setState(MechanismState.deployed);
         }
+    }
+    public static TBoneSubsystem getInstance() {
+        if (INSTANCE == null) { INSTANCE = new TBoneSubsystem(); }
+        return INSTANCE;
     }
 }
 

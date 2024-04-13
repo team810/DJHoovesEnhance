@@ -5,5 +5,6 @@ public interface TBoneIO {
 
     void setVoltage(double voltage);
 
-    void update();
+    void readPeriodic();
+    void writePeriodic();
 }

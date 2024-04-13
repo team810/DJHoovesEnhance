@@ -24,11 +24,17 @@ public class IntakeSim implements IntakeIO {
     }
 
     @Override
-    public void update() {
+    public void readPeriodic() {
+
+    }
+
+    @Override
+    public void writePeriodic() {
         Logger.recordOutput("Intake/Top/CurrentDraw", topMotor.getCurrentDrawAmps());
         Logger.recordOutput("Intake/Top/Velocity", topMotor.getAngularVelocityRPM());
 
         Logger.recordOutput("Intake/Bottom/CurrentDraw", bottomMotor.getCurrentDrawAmps());
         Logger.recordOutput("Intake/Bottom/Velocity", bottomMotor.getAngularVelocityRPM());
     }
+
 }

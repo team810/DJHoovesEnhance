@@ -32,10 +32,13 @@ public class ShooterSim implements ShooterIO{
     }
 
     @Override
-    public void update() {
+    public void readPeriodic() {
         topMotor.update(Robot.defaultPeriodSecs);
         bottomMotor.update(Robot.defaultPeriodSecs);
+    }
 
+    @Override
+    public void writePeriodic() {
         Logger.recordOutput("Shooter/Top/Voltage", topVoltage);
         Logger.recordOutput("Shooter/Top/CurrentDraw", topMotor.getCurrentDrawAmps());
         Logger.recordOutput("Shooter/Top/Velocity", topMotor.getAngularVelocityRPM());
@@ -44,5 +47,4 @@ public class ShooterSim implements ShooterIO{
         Logger.recordOutput("Shooter/Bottom/CurrentDraw", bottomMotor.getCurrentDrawAmps());
         Logger.recordOutput("Shooter/Bottom/Velocity", bottomMotor.getAngularVelocityRPM());
     }
-
 }

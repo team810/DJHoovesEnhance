@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.ChoreoTrajectoryCommand;
+import frc.robot.commands.swerve.ChoreoTrajectoryCommand;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 
 public class AutoBuilder {

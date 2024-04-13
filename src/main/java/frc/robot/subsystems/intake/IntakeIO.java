@@ -4,5 +4,6 @@ public interface IntakeIO {
 
     void setVoltage(double voltage);
 
-    void update();
+    void writePeriodic();
+    void readPeriodic();
 }
