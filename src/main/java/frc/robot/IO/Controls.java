@@ -7,4 +7,30 @@ public enum Controls {
     reset_gyro,
     slowMode,
     normalMode,
+
+    autoAlignPodium,
+    autoAlignAmp,
+    autoAlignSource,
+
+    intakeFWD,
+    intakeREVS,
+    sourceIntake,
+
+    fire,
+
+    releaseClimber,
+    pinClimber,
+    climb,
+    invertClimb,
+
+    toggleTBone,
+
+    toggleDeflector,
+
+    AmpScore,
+    revTape,
+    revSpeaker,
+
+    intakeManual
+
 }
