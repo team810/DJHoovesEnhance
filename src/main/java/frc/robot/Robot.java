@@ -12,7 +12,8 @@ import frc.robot.commands.*;
 import frc.robot.commands.intake.IntakeFwdCommand;
 import frc.robot.commands.intake.IntakeRevCommand;
 import frc.robot.commands.intake.IntakeSourceCommand;
-import frc.robot.commands.swerve.TelopController;
+import frc.robot.commands.swerve.DpadTurn;
+import frc.robot.commands.swerve.TeleopController;
 import frc.robot.lib.MechanismState;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.deflector.DeflectorSubsystem;
@@ -26,6 +27,7 @@ import frc.robot.subsystems.tbone.TBoneSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot
 {
@@ -37,6 +39,7 @@ public class Robot extends LoggedRobot
 
         if (isReal()) {
             Logger.addDataReceiver(new NT4Publisher());
+            Logger.addDataReceiver(new WPILOGWriter());
         } else {
             Logger.addDataReceiver(new NT4Publisher());
         }
@@ -54,7 +57,7 @@ public class Robot extends LoggedRobot
 
         setUseTiming(true);
         CommandScheduler.getInstance().unregisterAllSubsystems();
-        CommandScheduler.getInstance().setPeriod(.15);
+        CommandScheduler.getInstance().setPeriod(.10);
 
         autonomousCommand = AutoBuilder.getAuto();
 
@@ -77,6 +80,22 @@ public class Robot extends LoggedRobot
 
         new Trigger(() -> IO.getButtonValue(Controls.toggleTBone).get()).toggleOnTrue(new TBoneCommand());
         new Trigger(() -> IO.getButtonValue(Controls.toggleDeflector).get()).onTrue(new InstantCommand(() -> DeflectorSubsystem.getInstance().toggleDeflectorState()));
+
+        new Trigger(() -> IO.getButtonValue(Controls.slowMode).get()).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.slow)));
+        new Trigger(() -> IO.getButtonValue(Controls.normalMode).get()).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.normal)));
+        new Trigger(() -> IO.getDpadPrimary() != -1).whileTrue(new DpadTurn());
+
+//        new Trigger(() -> IO.getButtonValue(Controls.slowMode).get()).toggleOnTrue(
+//                new InstantCommand(() -> {
+//                    if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.slow)
+//                    {
+//                        DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.normal);
+//                    }else{
+//                        DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.slow);
+//                    }
+//                })
+//        );
+
     }
 
     @Override
@@ -116,7 +135,8 @@ public class Robot extends LoggedRobot
         {
             autonomousCommand.cancel();
         }
-        CommandScheduler.getInstance().schedule(new TelopController());
+        CommandScheduler.getInstance().schedule(new TeleopController());
+
 
         TBoneSubsystem.getInstance().setState(MechanismState.stored);
         ShooterSubsystem.getInstance().setShooterMode(ShooterMode.off);
@@ -124,10 +144,6 @@ public class Robot extends LoggedRobot
         DeflectorSubsystem.getInstance().setDeflectorState(MechanismState.stored);
     }
 
-    @Override
-    public void teleopPeriodic() {
-
-    }
     @Override
     public void autonomousInit()
     {
@@ -138,9 +154,11 @@ public class Robot extends LoggedRobot
     }
 
     @Override
-    public void autonomousPeriodic() {
-
+    public void teleopPeriodic() {
     }
 
+    @Override
+    public void autonomousPeriodic() {
+    }
 
 }

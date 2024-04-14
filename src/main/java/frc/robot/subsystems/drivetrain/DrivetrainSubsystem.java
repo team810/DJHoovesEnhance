@@ -3,6 +3,7 @@ package frc.robot.subsystems.drivetrain;
 import com.choreo.lib.ChoreoTrajectoryState;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.CANSparkBase;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -19,6 +20,7 @@ import frc.robot.Robot;
 import frc.robot.lib.AdvancedSubsystem;
 import frc.robot.lib.LimelightHelpers;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class DrivetrainSubsystem extends AdvancedSubsystem {
     private static DrivetrainSubsystem INSTANCE;
@@ -56,8 +58,8 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     private SwerveDriveWheelPositions previousWheelPositions;
 
     private final ProfiledPIDController headingController;
-    private double targetAngle;
-    private HeadingControlMode controlMode;
+    private Rotation2d targetAngle;
+    private HeadingControlMode headingControlMode;
 
     private final SwerveTrajectoryController swerveController;
     private ChoreoTrajectoryState trajectoryState;
@@ -131,9 +133,12 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, gyro.getRotation2d(), getModulePositions(), new Pose2d());
         poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
 
-        headingController = new ProfiledPIDController(0,0,0,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION));
+        headingController = new ProfiledPIDController(2,0,0,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION));
         headingController.enableContinuousInput(-Math.PI, Math.PI);
-        headingController.setTolerance(Math.toRadians(.5),0);
+        headingController.setTolerance(Math.toRadians(.5),.5);
+
+        headingControlMode = HeadingControlMode.velocity;
+        targetAngle = new Rotation2d();
 
         previousWheelPositions = new SwerveDriveWheelPositions(getModulePositions());
         currentWheelPositions = new SwerveDriveWheelPositions(getModulePositions());
@@ -143,6 +148,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
                 new PIDController(7,0,0),
                 new PIDController(10,0,0)
         );
+
 
         trajectoryState = new ChoreoTrajectoryState(0,0,0,0,0,0,0);
     }
@@ -212,8 +218,19 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
                 targetSpeeds.omegaRadiansPerSecond = invert * targetSpeeds.omegaRadiansPerSecond;
             }
             case telop -> {
-
                 targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(telopSpeeds,getFiledRelativeOrientationOfRobot());
+                switch (headingControlMode)
+                {
+                    case dpad -> {
+                        double plant = headingController.calculate(getFiledRelativeOrientationOfRobot().getRadians(), new TrapezoidProfile.State(targetAngle.getRadians(), 0) );
+                        plant = MathUtil.clamp(plant, -DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_VELOCITY);
+                        targetSpeeds.omegaRadiansPerSecond = plant;
+                    }
+                    case velocity -> {
+
+                    }
+                }
+
             }
             case off -> {
                 targetSpeeds = new ChassisSpeeds(0,0,0);
@@ -221,7 +238,9 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         }
 
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(targetSpeeds);
+
         SwerveDriveKinematics.desaturateWheelSpeeds(states, DrivetrainConstants.NORMAL_SPEED);
+
 
         states[0] = SwerveModuleState.optimize(states[0], frontLeft.getState().angle);
         states[1] = SwerveModuleState.optimize(states[1], frontRight.getState().angle);
@@ -302,7 +321,19 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         return this.swerveController.atReference();
     }
     public ChassisSpeeds getCurrentSpeeds() {return currentSpeeds;}
-
+    public HeadingControlMode getControlMode() {
+        return headingControlMode;
+    }
+    public void setHeadingControlMode(HeadingControlMode controlMode) {
+        this.headingControlMode = controlMode;
+        headingController.reset(getFiledRelativeOrientationOfRobot().getRadians());
+    }
+    public Rotation2d getTargetAngle() {
+        return targetAngle;
+    }
+    public void setTargetAngle(Rotation2d targetAngle) {
+        this.targetAngle = targetAngle;
+    }
 
     public enum DrivetrainMode
     {
@@ -313,9 +344,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     public enum HeadingControlMode
     {
         velocity,
-        angle,
-        maintain,
-        snap,
+        dpad,
     }
     public enum SpeedMode
     {

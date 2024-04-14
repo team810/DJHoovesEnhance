@@ -15,19 +15,17 @@ import frc.robot.IO.IO;
 import frc.robot.subsystems.drivetrain.DrivetrainConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 
-public class TelopController extends Command {
+public class TeleopController extends Command {
     private final SlewRateLimiter xLimiter;
     private final SlewRateLimiter yLimiter;
     private final SlewRateLimiter thetaLimiter;
 
     private double invert = 1;
 
-    public TelopController() {
+    public TeleopController() {
         xLimiter = new SlewRateLimiter(DrivetrainConstants.MAX_ACCELERATION);
         yLimiter = new SlewRateLimiter(DrivetrainConstants.MAX_ACCELERATION);
         thetaLimiter = new SlewRateLimiter(DrivetrainConstants.MAX_ANGULAR_ACCELERATION);
-
-        addRequirements(DrivetrainSubsystem.getInstance());
     }
 
 
@@ -40,14 +38,14 @@ public class TelopController extends Command {
         xInput = xInput * invert;
         yInput = yInput * invert;
 
-//        xInput = xLimiter.calculate(xInput);
-//        yInput = yLimiter.calculate(yInput);
+        xInput = xLimiter.calculate(xInput);
+        yInput = yLimiter.calculate(yInput);
+        thetaInput = thetaLimiter.calculate(thetaInput);
 
         Translation2d linerVelocityCalc = calcLinearVelocity(xInput, yInput);
 
         thetaInput = MathUtil.applyDeadband(thetaInput, .05);
         thetaInput = Math.copySign(thetaInput * thetaInput, thetaInput);
-
 
         if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.normal)
         {
@@ -92,7 +90,10 @@ public class TelopController extends Command {
     }
 
     @Override
-    public void end(boolean interrupted) {DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.off);}
+    public void end(boolean interrupted) {
+        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.off);
+        System.out.println(interrupted);
+    }
 
     @Override
     public boolean isFinished() {return !RobotState.isTeleop();}

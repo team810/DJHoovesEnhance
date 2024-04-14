@@ -10,7 +10,6 @@ public abstract class IO {
     private static final XboxController primary = new XboxController(0);
     private static final XboxController secondary = new XboxController(1);
 
-
     private static final HashMap<Controls, Supplier<Double>> controlsJoystick = new HashMap<>();
     private static final HashMap<Controls, Supplier<Boolean>> controlsButtons = new HashMap<>();
 
@@ -22,8 +21,6 @@ public abstract class IO {
         controlsButtons.put(Controls.reset_gyro, primary::getLeftBumper);
         controlsButtons.put(Controls.slowMode, primary::getRightBumper);
         controlsButtons.put(Controls.normalMode, () -> (.75 < primary.getRightTriggerAxis()));
-//        controlsButtons.put(Controls.normalMode, primary::getRightTriggerButton);
-//        controlsButtons.put(Controls.rotateToTarget, primary::getAButton);
 
         controlsButtons.put(Controls.autoAlignAmp, primary::getBButton);
         controlsButtons.put(Controls.autoAlignPodium, primary::getAButton);
@@ -31,10 +28,6 @@ public abstract class IO {
 
         controlsButtons.put(Controls.intakeFWD, secondary::getAButton);
         controlsButtons.put(Controls.intakeREVS, secondary::getYButton);
-
-//        controlsButtons.put(Controls.fire, secondary::getRightTriggerButton);
-//        controlsButtons.put(Controls.revSpeaker, secondary::getLeftBumper);
-//        controlsButtons.put(Controls.revTape, secondary::getLeftTriggerButton);
 
         controlsButtons.put(Controls.fire, () -> secondary.getRightTriggerAxis() > .75);
         controlsButtons.put(Controls.revSpeaker, secondary::getLeftBumper);
@@ -60,6 +53,11 @@ public abstract class IO {
 
     public static Supplier<Boolean> getButtonValue(Controls control) {
         return controlsButtons.get(control);
+    }
+
+    public static double getDpadPrimary()
+    {
+        return primary.getPOV();
     }
 }
 

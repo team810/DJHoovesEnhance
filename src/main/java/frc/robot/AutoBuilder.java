@@ -12,7 +12,7 @@ import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 public class AutoBuilder {
     public static Command getAuto()
     {
-        ChoreoTrajectory trajectory = Choreo.getTrajectory("Testing");
+        ChoreoTrajectory trajectory = Choreo.getTrajectory("4 Peice");
 
         return new SequentialCommandGroup(
                 new InstantCommand(() -> {
