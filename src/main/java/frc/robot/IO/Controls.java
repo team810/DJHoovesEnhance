@@ -3,7 +3,13 @@ package frc.robot.IO;
 public enum Controls {
     drive_x,
     drive_y,
+
+    headingX,
+    headingY,
+    throttle,
     drive_theta,
+
+
     reset_gyro,
     slowMode,
     normalMode,
@@ -30,7 +36,4 @@ public enum Controls {
     AmpScore,
     revTape,
     revSpeaker,
-
-    intakeManual
-
 }

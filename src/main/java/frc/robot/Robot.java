@@ -1,6 +1,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -28,6 +29,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.urcl.URCL;
 
 public class Robot extends LoggedRobot
 {
@@ -35,7 +37,7 @@ public class Robot extends LoggedRobot
 
     @Override
     public void robotInit() {
-        Logger.recordMetadata("ProjectName", "Swerve Test"); // Set a metadata value
+        Logger.recordMetadata("ProjectName", "DJHooves Enhance");
 
         if (isReal()) {
             Logger.addDataReceiver(new NT4Publisher());
@@ -43,6 +45,7 @@ public class Robot extends LoggedRobot
         } else {
             Logger.addDataReceiver(new NT4Publisher());
         }
+        Logger.registerURCL(URCL.startExternal());
         Logger.start();
 
         IO.Initialize();
