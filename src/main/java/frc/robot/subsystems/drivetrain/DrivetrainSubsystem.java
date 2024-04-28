@@ -20,7 +20,6 @@ import frc.robot.Robot;
 import frc.robot.lib.AdvancedSubsystem;
 import frc.robot.lib.LimelightHelpers;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class DrivetrainSubsystem extends AdvancedSubsystem {
     private static DrivetrainSubsystem INSTANCE;
@@ -135,7 +134,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
 
         headingController = new ProfiledPIDController(2,0,0,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION));
         headingController.enableContinuousInput(-Math.PI, Math.PI);
-        headingController.setTolerance(Math.toRadians(.5),.5);
+        headingController.setTolerance(Math.toRadians(1),0);
 
         headingControlMode = HeadingControlMode.velocity;
         targetAngle = new Rotation2d();
@@ -157,6 +156,8 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     public void readPeriodic() {
         if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
             invert = -1;
+        }else{
+            invert = 1;
         }
 
         frontLeft.readPeriodic();
@@ -212,25 +213,23 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
             case trajectory ->
             {
                 targetSpeeds = swerveController.calculate(getRobotPose(), trajectoryState);
-
                 targetSpeeds.vxMetersPerSecond = invert * targetSpeeds.vxMetersPerSecond;
                 targetSpeeds.vyMetersPerSecond = invert * targetSpeeds.vyMetersPerSecond;
-                targetSpeeds.omegaRadiansPerSecond = invert * targetSpeeds.omegaRadiansPerSecond;
             }
             case telop -> {
                 targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(telopSpeeds,getFiledRelativeOrientationOfRobot());
                 switch (headingControlMode)
                 {
                     case dpad -> {
-                        double plant = headingController.calculate(getFiledRelativeOrientationOfRobot().getRadians(), new TrapezoidProfile.State(targetAngle.getRadians(), 0) );
+                        double plant = headingController.calculate(getFiledRelativeOrientationOfRobot().getRadians(), targetAngle.getRadians());
                         plant = MathUtil.clamp(plant, -DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_VELOCITY);
+
                         targetSpeeds.omegaRadiansPerSecond = plant;
                     }
                     case velocity -> {
 
                     }
                 }
-
             }
             case off -> {
                 targetSpeeds = new ChassisSpeeds(0,0,0);
@@ -240,7 +239,6 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(targetSpeeds);
 
         SwerveDriveKinematics.desaturateWheelSpeeds(states, DrivetrainConstants.NORMAL_SPEED);
-
 
         states[0] = SwerveModuleState.optimize(states[0], frontLeft.getState().angle);
         states[1] = SwerveModuleState.optimize(states[1], frontRight.getState().angle);
@@ -274,7 +272,6 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         Logger.recordOutput("Drivetrain/Mode", drivetrainMode);
         Logger.recordOutput("Drivetrain/RobotPose", getRobotPose());
         Logger.recordOutput("Drivetrain/Rotation", getFiledRelativeOrientationOfRobot());
-
     }
 
     private SwerveModulePosition[] getModulePositions() {return new SwerveModulePosition[]{frontLeftPosition, frontRightPosition, backLeftPosition, backRightPosition};}
@@ -307,9 +304,9 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     public void resetGyroButton() {
         if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red)
         {
-            setYaw(0);
+            poseEstimator.resetPosition(gyro.getRotation2d(),getModulePositions(), new Pose2d(getRobotPose().getX(), getRobotPose().getY(), Rotation2d.fromDegrees(180)));
         }else{
-            setYaw(180);
+            poseEstimator.resetPosition(gyro.getRotation2d(),getModulePositions(), new Pose2d(getRobotPose().getX(), getRobotPose().getY(), Rotation2d.fromDegrees(0)));
         }
     }
     public SwerveDriveKinematics getKinematics(){return kinematics;}

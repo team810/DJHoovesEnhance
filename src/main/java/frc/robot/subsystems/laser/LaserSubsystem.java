@@ -33,11 +33,6 @@ public class LaserSubsystem extends AdvancedSubsystem {
     }
     public LaserState getLaserState()
     {
-        return state;
-    }
-
-    @Override
-    public void readPeriodic() {
         if (Robot.isReal())
         {
             distance = sensor.getMeasurement().distance_mm;
@@ -50,8 +45,8 @@ public class LaserSubsystem extends AdvancedSubsystem {
         }else{
             state = LaserState.Undetected;
         }
+        return state;
     }
-
     @Override
     public void writePeriodic() {
         Logger.recordOutput("LaserSensor/Distance", distance);

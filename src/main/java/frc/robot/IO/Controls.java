@@ -9,7 +9,6 @@ public enum Controls {
     throttle,
     drive_theta,
 
-
     reset_gyro,
     slowMode,
     normalMode,

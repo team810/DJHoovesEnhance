@@ -60,7 +60,7 @@ public abstract class IO {
         return controlsButtons.get(control);
     }
 
-    public static double getDpadPrimary()
+    public static double getDPadPrimary()
     {
         return primary.getPOV();
     }

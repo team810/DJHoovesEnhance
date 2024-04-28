@@ -1,8 +1,6 @@
 package frc.robot.subsystems.climber;
 
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 import frc.robot.lib.AdvancedSubsystem;
 
 public class ClimberSubsystem extends AdvancedSubsystem {
@@ -10,7 +8,6 @@ public class ClimberSubsystem extends AdvancedSubsystem {
     private static ClimberSubsystem INSTANCE = new ClimberSubsystem();
 
     private ClimberIO climber;
-
     private ClimberStates state;
 
     public static ClimberSubsystem getInstance() {
@@ -33,6 +30,18 @@ public class ClimberSubsystem extends AdvancedSubsystem {
 
     @Override
     public void writePeriodic() {
+
+        climber.writePeriodic();
+    }
+
+    public void releaseClimber()
+    {
+        climber.release();
+    }
+
+    public void pinClimber() { climber.pin(); }
+
+    public void setState(ClimberStates state) {
         switch (state)
         {
             case down -> {
@@ -45,17 +54,6 @@ public class ClimberSubsystem extends AdvancedSubsystem {
                 climber.setVoltage(0);
             }
         }
-        climber.writePeriodic();
-    }
-
-    public void releaseClimber()
-    {
-        climber.release();
-    }
-
-    public void pinClimber() { climber.pin(); }
-
-    public void setState(ClimberStates state) {
         this.state = state;
     }
 }

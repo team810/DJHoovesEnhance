@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.IO.Controls;
@@ -11,9 +12,11 @@ import frc.robot.IO.IO;
 import frc.robot.subsystems.drivetrain.DrivetrainConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 
-class HeadingTelopController extends Command {
+public class HeadingTelopController extends Command {
     private final SlewRateLimiter throttleLimiter;
     private final SlewRateLimiter thetaLimiter;
+
+    private double invert = 1;
 
     public HeadingTelopController() {
         throttleLimiter = new SlewRateLimiter(DrivetrainConstants.MAX_ACCELERATION);
@@ -22,26 +25,33 @@ class HeadingTelopController extends Command {
 
     @Override
     public void execute() {
-        ChassisSpeeds speeds;
-        Rotation2d heading;
-
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+            invert = -1;
+        }else{
+            invert = 1;
+        }
         double xHeadingInput;
         double yHeadingInput;
         double thetaInput;
         double throttleInput;
 
-        xHeadingInput = IO.getJoystickValue(Controls.headingX).get();
-        yHeadingInput = IO.getJoystickValue(Controls.headingY).get();
+        Rotation2d heading;
+
+        xHeadingInput = -IO.getJoystickValue(Controls.headingX).get();
+        yHeadingInput = -IO.getJoystickValue(Controls.headingY).get();
         throttleInput = IO.getJoystickValue(Controls.throttle).get();
-        thetaInput = IO.getJoystickValue(Controls.drive_theta).get();
+        thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();
+
+        xHeadingInput = xHeadingInput * invert;
+        yHeadingInput = yHeadingInput * invert;
 
         throttleInput = throttleLimiter.calculate(throttleInput);
         thetaInput = thetaLimiter.calculate(thetaInput);
 
-        xHeadingInput = MathUtil.applyDeadband(xHeadingInput, .05);
-        yHeadingInput = MathUtil.applyDeadband(yHeadingInput, .05);
-        throttleInput = MathUtil.applyDeadband(throttleInput, .05);
-        thetaInput = MathUtil.applyDeadband(thetaInput, .05);
+        xHeadingInput = MathUtil.applyDeadband(xHeadingInput, .1);
+        yHeadingInput = MathUtil.applyDeadband(yHeadingInput, .1);
+        throttleInput = MathUtil.applyDeadband(throttleInput, .1);
+        thetaInput = MathUtil.applyDeadband(thetaInput, .1);
 
         thetaInput = Math.copySign(thetaInput * thetaInput, thetaInput);
         throttleInput = Math.pow(throttleInput, 3);
@@ -60,10 +70,15 @@ class HeadingTelopController extends Command {
         double xVelocity;
         double yVelocity;
         double thetaVelocity;
-
-        xVelocity = heading.getCos() * throttleInput;
-        yVelocity = heading.getSin() * throttleInput;
+        xVelocity = heading.getSin() * throttleInput;
+        yVelocity = heading.getCos() * throttleInput;
         thetaVelocity = thetaInput;
+
+        if (xHeadingInput == 0 && yHeadingInput == 0)
+        {
+            xVelocity = 0;
+            yVelocity = 0;
+        }
 
         DrivetrainSubsystem.getInstance().setTelopSpeeds(new ChassisSpeeds(xVelocity, yVelocity, thetaVelocity));
     }

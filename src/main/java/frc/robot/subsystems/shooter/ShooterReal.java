@@ -1,7 +1,6 @@
 package frc.robot.subsystems.shooter;
 
 import com.revrobotics.*;
-import edu.wpi.first.wpilibj.RobotState;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterReal implements ShooterIO {
@@ -71,12 +70,6 @@ public class ShooterReal implements ShooterIO {
     public void writePeriodic() {
         topController.setReference(topTargetRPM, CANSparkBase.ControlType.kVelocity);
         bottomController.setReference(bottomTargetRPM, CANSparkBase.ControlType.kVelocity);
-
-        if (RobotState.isDisabled())
-        {
-            topController.setIAccum(0);
-            bottomController.setIAccum(0);
-        }
     }
 
     @Override

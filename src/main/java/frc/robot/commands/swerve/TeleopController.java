@@ -44,7 +44,7 @@ public class TeleopController extends Command {
 
         Translation2d linerVelocityCalc = calcLinearVelocity(xInput, yInput);
 
-        thetaInput = MathUtil.applyDeadband(thetaInput, .05);
+        thetaInput = MathUtil.applyDeadband(thetaInput, .1);
         thetaInput = Math.copySign(thetaInput * thetaInput, thetaInput);
 
         if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.normal)

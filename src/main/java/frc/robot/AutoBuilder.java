@@ -18,9 +18,9 @@ public class AutoBuilder {
                 new InstantCommand(() -> {
                     if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red)
                     {
-                        DrivetrainSubsystem.getInstance().setFiledRelativePose(Choreo.getTrajectory("Testing").flipped().getInitialPose());
+                        DrivetrainSubsystem.getInstance().setFiledRelativePose(Choreo.getTrajectory("4 Peice").flipped().getInitialPose());
                     }else{
-                        DrivetrainSubsystem.getInstance().setFiledRelativePose(Choreo.getTrajectory("Testing").getInitialPose());
+                        DrivetrainSubsystem.getInstance().setFiledRelativePose(Choreo.getTrajectory("4 Peice").getInitialPose());
                     }
                 },DrivetrainSubsystem.getInstance()),
                 new ChoreoTrajectoryCommand(trajectory)

@@ -28,7 +28,7 @@ class SwerveModuleSim implements SwerveModuleIO {
 	public SwerveModuleSim(SwerveModuleDetails details) {
 		this.details = details;
 
-		drive = new FlywheelSim(DCMotor.getNeoVortex(1),6.75, .025);
+		drive = new FlywheelSim(DCMotor.getNEO(1),6.75, .025);
 		steer = new FlywheelSim(DCMotor.getNEO(1), 21.428571428571427, 0.004);
 
 		driveVoltage = 0;

@@ -1,5 +1,12 @@
 {
   "HALProvider": {
+    "Other Devices": {
+      "Pigeon 2 (v6)[21]": {
+        "header": {
+          "open": true
+        }
+      }
+    },
     "PowerDistributions": {
       "0": {
         "PowerDistribution[0]": {

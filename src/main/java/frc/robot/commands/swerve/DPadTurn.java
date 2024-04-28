@@ -6,8 +6,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.IO.IO;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 
-public class DpadTurn extends Command {
-    public DpadTurn() {}
+public class DPadTurn extends Command {
+    public DPadTurn() {}
 
     @Override
     public void initialize() {
@@ -17,7 +17,7 @@ public class DpadTurn extends Command {
 
     @Override
     public void execute() {
-        double input = IO.getDpadPrimary();
+        double input = IO.getDPadPrimary();
         if (input != -1) {
             Rotation2d rot = Rotation2d.fromDegrees(input);
             rot = rot.unaryMinus();
@@ -30,7 +30,7 @@ public class DpadTurn extends Command {
 
     @Override
     public boolean isFinished() {
-        return IO.getDpadPrimary() == -1;
+        return IO.getDPadPrimary() == -1;
     }
 
     @Override

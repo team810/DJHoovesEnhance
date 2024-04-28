@@ -1,7 +1,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -13,8 +12,8 @@ import frc.robot.commands.*;
 import frc.robot.commands.intake.IntakeFwdCommand;
 import frc.robot.commands.intake.IntakeRevCommand;
 import frc.robot.commands.intake.IntakeSourceCommand;
-import frc.robot.commands.swerve.DpadTurn;
-import frc.robot.commands.swerve.TeleopController;
+import frc.robot.commands.swerve.DPadTurn;
+import frc.robot.commands.swerve.HeadingTelopController;
 import frc.robot.lib.MechanismState;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.deflector.DeflectorSubsystem;
@@ -38,6 +37,8 @@ public class Robot extends LoggedRobot
     @Override
     public void robotInit() {
         Logger.recordMetadata("ProjectName", "DJHooves Enhance");
+        DriverStation.silenceJoystickConnectionWarning(true);
+
 
         if (isReal()) {
             Logger.addDataReceiver(new NT4Publisher());
@@ -49,7 +50,6 @@ public class Robot extends LoggedRobot
         Logger.start();
 
         IO.Initialize();
-        DriverStation.silenceJoystickConnectionWarning(true);
 
         DrivetrainSubsystem.getInstance();
         ShooterSubsystem.getInstance();
@@ -60,9 +60,9 @@ public class Robot extends LoggedRobot
 
         setUseTiming(true);
         CommandScheduler.getInstance().unregisterAllSubsystems();
-        CommandScheduler.getInstance().setPeriod(.10);
+        CommandScheduler.getInstance().setPeriod(.15);
 
-        autonomousCommand = AutoBuilder.getAuto();
+
 
         new Trigger(() -> IO.getButtonValue(Controls.reset_gyro).get()).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().resetGyroButton()));
 
@@ -84,20 +84,17 @@ public class Robot extends LoggedRobot
         new Trigger(() -> IO.getButtonValue(Controls.toggleTBone).get()).toggleOnTrue(new TBoneCommand());
         new Trigger(() -> IO.getButtonValue(Controls.toggleDeflector).get()).onTrue(new InstantCommand(() -> DeflectorSubsystem.getInstance().toggleDeflectorState()));
 
-        new Trigger(() -> IO.getButtonValue(Controls.slowMode).get()).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.slow)));
-        new Trigger(() -> IO.getButtonValue(Controls.normalMode).get()).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.normal)));
-        new Trigger(() -> IO.getDpadPrimary() != -1).whileTrue(new DpadTurn());
-
-//        new Trigger(() -> IO.getButtonValue(Controls.slowMode).get()).toggleOnTrue(
-//                new InstantCommand(() -> {
-//                    if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.slow)
-//                    {
-//                        DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.normal);
-//                    }else{
-//                        DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.slow);
-//                    }
-//                })
-//        );
+        new Trigger(() -> IO.getDPadPrimary() != -1).whileTrue(new DPadTurn());
+        new Trigger(() -> IO.getButtonValue(Controls.slowMode).get()).toggleOnTrue(
+                new InstantCommand(() -> {
+                    if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.slow)
+                    {
+                        DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.normal);
+                    }else{
+                        DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.slow);
+                    }
+                })
+        );
 
     }
 
@@ -138,22 +135,21 @@ public class Robot extends LoggedRobot
         {
             autonomousCommand.cancel();
         }
-        CommandScheduler.getInstance().schedule(new TeleopController());
-
 
         TBoneSubsystem.getInstance().setState(MechanismState.stored);
         ShooterSubsystem.getInstance().setShooterMode(ShooterMode.off);
         IntakeSubsystem.getInstance().setState(IntakeStates.off);
         DeflectorSubsystem.getInstance().setDeflectorState(MechanismState.stored);
+
+        //CommandScheduler.getInstance().schedule(new TeleopController());
+        CommandScheduler.getInstance().schedule(new HeadingTelopController());
     }
 
     @Override
     public void autonomousInit()
     {
-        if (autonomousCommand != null)
-        {
-            autonomousCommand.schedule();
-        }
+        autonomousCommand = AutoBuilder.getAuto();
+        autonomousCommand.schedule();
     }
 
     @Override
