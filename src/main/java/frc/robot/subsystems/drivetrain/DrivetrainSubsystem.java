@@ -6,14 +6,12 @@ import com.revrobotics.CANSparkBase;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.*;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.Robot;
@@ -56,7 +54,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     private SwerveDriveWheelPositions currentWheelPositions;
     private SwerveDriveWheelPositions previousWheelPositions;
 
-    private final ProfiledPIDController headingController;
+    private final PIDController headingController;
     private Rotation2d targetAngle;
     private HeadingControlMode headingControlMode;
 
@@ -132,7 +130,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, gyro.getRotation2d(), getModulePositions(), new Pose2d());
         poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
 
-        headingController = new ProfiledPIDController(2,0,0,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION));
+        headingController = new PIDController(2,0,0);
         headingController.enableContinuousInput(-Math.PI, Math.PI);
         headingController.setTolerance(Math.toRadians(1),0);
 
@@ -170,10 +168,10 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         backLeftPosition = backLeft.getModulePosition();
         backRightPosition = backRight.getModulePosition();
 
-        frontLeftPosition.distanceMeters = frontLeftPosition.distanceMeters * invert;
-        frontRightPosition.distanceMeters = frontRightPosition.distanceMeters * invert;
-        backLeftPosition.distanceMeters = backLeftPosition.distanceMeters * invert;
-        backRightPosition.distanceMeters = backRightPosition.distanceMeters * invert;
+//        frontLeftPosition.distanceMeters = frontLeftPosition.distanceMeters * invert;
+//        frontRightPosition.distanceMeters = frontRightPosition.distanceMeters * invert;
+//        backLeftPosition.distanceMeters = backLeftPosition.distanceMeters * invert;
+//        backRightPosition.distanceMeters = backRightPosition.distanceMeters * invert;
 
         currentWheelPositions = new SwerveDriveWheelPositions(getModulePositions());
 
@@ -213,14 +211,14 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
             case trajectory ->
             {
                 targetSpeeds = swerveController.calculate(getRobotPose(), trajectoryState);
-                targetSpeeds.vxMetersPerSecond = invert * targetSpeeds.vxMetersPerSecond;
-                targetSpeeds.vyMetersPerSecond = invert * targetSpeeds.vyMetersPerSecond;
+//                targetSpeeds.vxMetersPerSecond = targetSpeeds.vxMetersPerSecond;
+//                targetSpeeds.vyMetersPerSecond = invert * targetSpeeds.vyMetersPerSecond;
             }
             case telop -> {
                 targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(telopSpeeds,getFiledRelativeOrientationOfRobot());
                 switch (headingControlMode)
                 {
-                    case dpad -> {
+                    case dpad, rightStick -> {
                         double plant = headingController.calculate(getFiledRelativeOrientationOfRobot().getRadians(), targetAngle.getRadians());
                         plant = MathUtil.clamp(plant, -DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_VELOCITY);
 
@@ -272,6 +270,9 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         Logger.recordOutput("Drivetrain/Mode", drivetrainMode);
         Logger.recordOutput("Drivetrain/RobotPose", getRobotPose());
         Logger.recordOutput("Drivetrain/Rotation", getFiledRelativeOrientationOfRobot());
+
+        Logger.recordOutput("Drivetrain/RotationControl/Mode", headingControlMode.toString());
+        Logger.recordOutput("Drivetrain/RotationControl/TargetAngle", targetAngle);
     }
 
     private SwerveModulePosition[] getModulePositions() {return new SwerveModulePosition[]{frontLeftPosition, frontRightPosition, backLeftPosition, backRightPosition};}
@@ -323,7 +324,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     }
     public void setHeadingControlMode(HeadingControlMode controlMode) {
         this.headingControlMode = controlMode;
-        headingController.reset(getFiledRelativeOrientationOfRobot().getRadians());
+        headingController.reset();
     }
     public Rotation2d getTargetAngle() {
         return targetAngle;
@@ -342,6 +343,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     {
         velocity,
         dpad,
+        rightStick
     }
     public enum SpeedMode
     {

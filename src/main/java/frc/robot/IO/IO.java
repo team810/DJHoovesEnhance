@@ -26,6 +26,10 @@ public abstract class IO {
         controlsButtons.put(Controls.slowMode, primary::getRightBumper);
         controlsButtons.put(Controls.normalMode, () -> (.75 < primary.getRightTriggerAxis()));
 
+        controlsJoystick.put(Controls.thetaX, primary::getRightX);
+        controlsJoystick.put(Controls.thetaY, primary::getRightY);
+        controlsButtons.put(Controls.turningModeToggle, primary::getRightStickButton);
+
         controlsButtons.put(Controls.autoAlignAmp, primary::getBButton);
         controlsButtons.put(Controls.autoAlignPodium, primary::getAButton);
         controlsButtons.put(Controls.autoAlignSource, primary::getXButton);
