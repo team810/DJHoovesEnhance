@@ -62,8 +62,6 @@ public class Robot extends LoggedRobot
         CommandScheduler.getInstance().unregisterAllSubsystems();
         CommandScheduler.getInstance().setPeriod(.15);
 
-
-
         new Trigger(() -> IO.getButtonValue(Controls.reset_gyro).get()).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().resetGyroButton()));
 
         new Trigger(() -> IO.getButtonValue(Controls.intakeFWD).get()).whileTrue(new IntakeFwdCommand());
@@ -84,7 +82,7 @@ public class Robot extends LoggedRobot
         new Trigger(() -> IO.getButtonValue(Controls.toggleTBone).get()).toggleOnTrue(new TBoneCommand());
         new Trigger(() -> IO.getButtonValue(Controls.toggleDeflector).get()).onTrue(new InstantCommand(() -> DeflectorSubsystem.getInstance().toggleDeflectorState()));
 
-        new Trigger(() -> IO.getDPadPrimary() != -1).whileTrue(new DPadTurn());
+
         new Trigger(() -> IO.getButtonValue(Controls.slowMode).get()).toggleOnTrue(
                 new InstantCommand(() -> {
                     if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.slow)
@@ -96,6 +94,18 @@ public class Robot extends LoggedRobot
                 })
         );
 
+        new Trigger(() -> IO.getButtonValue(Controls.turningModeToggle).get()).toggleOnTrue(
+                new InstantCommand(() ->
+                {
+                    if (DrivetrainSubsystem.getInstance().getControlMode() == DrivetrainSubsystem.HeadingControlMode.rightStick)
+                    {
+                        DrivetrainSubsystem.getInstance().setHeadingControlMode(DrivetrainSubsystem.HeadingControlMode.velocity);
+                    }else{
+                        DrivetrainSubsystem.getInstance().setHeadingControlMode(DrivetrainSubsystem.HeadingControlMode.rightStick);
+                    }
+                })
+        );
+        new Trigger(() -> IO.getDPadPrimary() != -1).whileTrue(new DPadTurn());
     }
 
     @Override

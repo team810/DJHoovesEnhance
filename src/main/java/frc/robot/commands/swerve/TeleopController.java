@@ -64,6 +64,8 @@ public class TeleopController extends Command {
                     xInput,
                     thetaInput
                 ));
+
+        rightStickAngle();
     }
     public static Translation2d calcLinearVelocity(double x, double y) {
         // Apply deadband
@@ -80,7 +82,21 @@ public class TeleopController extends Command {
                         .getTranslation();
         return linearVelocity;
     }
+    void rightStickAngle()
+    {
+        double thetaX = -IO.getJoystickValue(Controls.thetaX).get();
+        double thetaY = -IO.getJoystickValue(Controls.thetaY).get();
 
+        boolean use;
+        use = MathUtil.isNear(1,Math.hypot(thetaX, thetaY),.1);
+
+        if (use)
+        {
+            DrivetrainSubsystem.getInstance().setTargetAngle(new Rotation2d(thetaY,thetaX));
+        }else{
+            DrivetrainSubsystem.getInstance().setTargetAngle(DrivetrainSubsystem.getInstance().getFiledRelativeOrientationOfRobot());
+        }
+    }
     @Override
     public void initialize() {
         DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.telop);

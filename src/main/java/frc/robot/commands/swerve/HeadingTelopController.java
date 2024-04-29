@@ -81,6 +81,8 @@ public class HeadingTelopController extends Command {
         }
 
         DrivetrainSubsystem.getInstance().setTelopSpeeds(new ChassisSpeeds(xVelocity, yVelocity, thetaVelocity));
+
+        rightStickAngle();
     }
 
     @Override
@@ -96,5 +98,21 @@ public class HeadingTelopController extends Command {
     @Override
     public boolean isFinished() {
         return !RobotState.isTeleop();
+    }
+
+    void rightStickAngle()
+    {
+        double thetaX = -IO.getJoystickValue(Controls.thetaX).get();
+        double thetaY = -IO.getJoystickValue(Controls.thetaY).get();
+
+        boolean use;
+        use = MathUtil.isNear(1,Math.hypot(thetaX, thetaY),.1);
+
+        if (use)
+        {
+            DrivetrainSubsystem.getInstance().setTargetAngle(new Rotation2d(thetaY,thetaX));
+        }else{
+            DrivetrainSubsystem.getInstance().setTargetAngle(DrivetrainSubsystem.getInstance().getFiledRelativeOrientationOfRobot());
+        }
     }
 }
