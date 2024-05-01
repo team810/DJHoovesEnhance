@@ -37,6 +37,7 @@ public class HeadingTelopController extends Command {
 
         Rotation2d heading;
 
+
         xHeadingInput = -IO.getJoystickValue(Controls.headingX).get();
         yHeadingInput = -IO.getJoystickValue(Controls.headingY).get();
         throttleInput = IO.getJoystickValue(Controls.throttle).get();

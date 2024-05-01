@@ -39,7 +39,7 @@ public class Robot extends LoggedRobot
         Logger.recordMetadata("ProjectName", "DJHooves Enhance");
         DriverStation.silenceJoystickConnectionWarning(true);
 
-
+        
         if (isReal()) {
             Logger.addDataReceiver(new NT4Publisher());
             Logger.addDataReceiver(new WPILOGWriter());

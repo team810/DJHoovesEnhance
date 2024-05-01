@@ -45,6 +45,9 @@
         "open": true
       },
       "limelight": {
+        "double[]##v_/limelight/robot_orientation_set": {
+          "open": true
+        },
         "open": true
       }
     }
