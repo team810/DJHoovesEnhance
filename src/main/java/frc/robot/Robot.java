@@ -33,13 +33,17 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot
 {
     private Command autonomousCommand;
+    double previseTime;
+    public Robot()
+    {
+        super(.012);
+    }
 
     @Override
     public void robotInit() {
         Logger.recordMetadata("ProjectName", "DJHooves Enhance");
         DriverStation.silenceJoystickConnectionWarning(true);
 
-        
         if (isReal()) {
             Logger.addDataReceiver(new NT4Publisher());
             Logger.addDataReceiver(new WPILOGWriter());
@@ -49,7 +53,7 @@ public class Robot extends LoggedRobot
         Logger.registerURCL(URCL.startExternal());
         Logger.start();
 
-        IO.Initialize();
+        IO.Initialize(IO.PrimaryDriverProfiles.Leo, IO.SecondaryDriverProfiles.KnollJoystick);
 
         DrivetrainSubsystem.getInstance();
         ShooterSubsystem.getInstance();
@@ -58,32 +62,32 @@ public class Robot extends LoggedRobot
         TBoneSubsystem.getInstance();
         LaserSubsystem.getInstance();
 
-        setUseTiming(true);
+        setUseTiming(false);
         CommandScheduler.getInstance().unregisterAllSubsystems();
-        CommandScheduler.getInstance().setPeriod(.15);
+        CommandScheduler.getInstance().setPeriod(.010);
 
-        new Trigger(() -> IO.getButtonValue(Controls.reset_gyro).get()).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().resetGyroButton()));
+        new Trigger(IO.getButtonValue(Controls.reset_gyro)).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().resetGyroButton()));
 
-        new Trigger(() -> IO.getButtonValue(Controls.intakeFWD).get()).whileTrue(new IntakeFwdCommand());
-        new Trigger(() -> IO.getButtonValue(Controls.intakeREVS).get()).whileTrue(new IntakeRevCommand());
-        new Trigger(() -> IO.getButtonValue(Controls.sourceIntake).get()).whileTrue(new IntakeSourceCommand());
+        new Trigger(IO.getButtonValue(Controls.intakeFWD)).whileTrue(new IntakeFwdCommand());
+        new Trigger(IO.getButtonValue(Controls.intakeREVS)).whileTrue(new IntakeRevCommand());
+        new Trigger(IO.getButtonValue(Controls.sourceIntake)).whileTrue(new IntakeSourceCommand());
 
-        new Trigger(() -> IO.getButtonValue(Controls.fire).get()).whileTrue(new FireCommand());
+        new Trigger(IO.getButtonValue(Controls.fire)).whileTrue(new FireCommand());
 
-        new Trigger(() -> IO.getButtonValue(Controls.AmpScore).get()).whileTrue(new AmpScoreCommand());
-        new Trigger(() -> IO.getButtonValue(Controls.revSpeaker).get()).whileTrue(new RevSpeakerCommand());
-        new Trigger(() -> IO.getButtonValue(Controls.revTape).get()).whileTrue(new RevTapeCommand());
+        new Trigger(IO.getButtonValue(Controls.AmpScore)).whileTrue(new AmpScoreCommand());
+        new Trigger(IO.getButtonValue(Controls.revSpeaker)).whileTrue(new RevSpeakerCommand());
+        new Trigger(IO.getButtonValue(Controls.revTape)).whileTrue(new RevTapeCommand());
 
-        new Trigger(() -> IO.getButtonValue(Controls.releaseClimber).get()).toggleOnTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().releaseClimber()));
-        new Trigger(() -> IO.getButtonValue(Controls.pinClimber).get()).toggleOnTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().pinClimber()));
-        new Trigger(() -> IO.getButtonValue(Controls.climb).get()).whileTrue(new ClimbCommand());
-        new Trigger(() -> IO.getButtonValue(Controls.invertClimb).get()).whileTrue(new ReverseClimbCommand());
+        new Trigger(IO.getButtonValue(Controls.releaseClimber)).toggleOnTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().releaseClimber()));
+        new Trigger(IO.getButtonValue(Controls.pinClimber)).toggleOnTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().pinClimber()));
+        new Trigger(IO.getButtonValue(Controls.climb)).whileTrue(new ClimbCommand());
+        new Trigger(IO.getButtonValue(Controls.invertClimb)).whileTrue(new ReverseClimbCommand());
 
-        new Trigger(() -> IO.getButtonValue(Controls.toggleTBone).get()).toggleOnTrue(new TBoneCommand());
-        new Trigger(() -> IO.getButtonValue(Controls.toggleDeflector).get()).onTrue(new InstantCommand(() -> DeflectorSubsystem.getInstance().toggleDeflectorState()));
+        new Trigger(IO.getButtonValue(Controls.toggleTBone)).toggleOnTrue(new TBoneCommand());
+        new Trigger(IO.getButtonValue(Controls.toggleDeflector)).onTrue(new InstantCommand(() -> DeflectorSubsystem.getInstance().toggleDeflectorState()));
 
 
-        new Trigger(() -> IO.getButtonValue(Controls.slowMode).get()).toggleOnTrue(
+        new Trigger(IO.getButtonValue(Controls.slowMode)).toggleOnTrue(
                 new InstantCommand(() -> {
                     if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.slow)
                     {
@@ -94,7 +98,7 @@ public class Robot extends LoggedRobot
                 })
         );
 
-        new Trigger(() -> IO.getButtonValue(Controls.turningModeToggle).get()).toggleOnTrue(
+        new Trigger(IO.getButtonValue(Controls.turningModeToggle)).toggleOnTrue(
                 new InstantCommand(() ->
                 {
                     if (DrivetrainSubsystem.getInstance().getControlMode() == DrivetrainSubsystem.HeadingControlMode.rightStick)
@@ -105,7 +109,10 @@ public class Robot extends LoggedRobot
                     }
                 })
         );
+
         new Trigger(() -> IO.getDPadPrimary() != -1).whileTrue(new DPadTurn());
+        previseTime = Logger.getRealTimestamp();
+
     }
 
     @Override
@@ -114,6 +121,8 @@ public class Robot extends LoggedRobot
         readPeriodicInputs();
         CommandScheduler.getInstance().run();
         writePeriodicInputs();
+        Logger.recordOutput("TimeDelta", (Logger.getRealTimestamp() - previseTime)/1000000);
+        previseTime = Logger.getRealTimestamp();
 
     }
     public void readPeriodicInputs()
@@ -139,6 +148,20 @@ public class Robot extends LoggedRobot
     }
 
     @Override
+    public void disabledInit() {
+
+    }
+    @Override
+    public void disabledPeriodic() {
+
+    }
+
+    @Override
+    public void disabledExit() {
+
+    }
+
+    @Override
     public void teleopInit()
     {
         if (autonomousCommand != null)
@@ -151,7 +174,7 @@ public class Robot extends LoggedRobot
         IntakeSubsystem.getInstance().setState(IntakeStates.off);
         DeflectorSubsystem.getInstance().setDeflectorState(MechanismState.stored);
 
-        //CommandScheduler.getInstance().schedule(new TeleopController());
+//        CommandScheduler.getInstance().schedule(new TeleopController());
         CommandScheduler.getInstance().schedule(new HeadingTelopController());
     }
 

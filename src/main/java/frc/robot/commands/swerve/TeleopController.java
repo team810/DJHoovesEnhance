@@ -31,8 +31,8 @@ public class TeleopController extends Command {
 
     @Override
     public void execute() {
-        double xInput = IO.getJoystickValue(Controls.drive_x).get();
-        double yInput = IO.getJoystickValue(Controls.drive_y).get();
+        double xInput = -IO.getJoystickValue(Controls.drive_x).get();
+        double yInput = -IO.getJoystickValue(Controls.drive_y).get();
         double thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();
 
         xInput = xInput * invert;
@@ -84,15 +84,40 @@ public class TeleopController extends Command {
     }
     void rightStickAngle()
     {
-        double thetaX = -IO.getJoystickValue(Controls.thetaX).get();
-        double thetaY = -IO.getJoystickValue(Controls.thetaY).get();
+        double thetaX = IO.getJoystickValue(Controls.thetaX).get();
+        double thetaY = IO.getJoystickValue(Controls.thetaY).get();
 
         boolean use;
+
         use = MathUtil.isNear(1,Math.hypot(thetaX, thetaY),.1);
+        Rotation2d targetAngle;
+        Rotation2d inputAngle = new Rotation2d(thetaY, thetaX);
+        double tolerance = 20;
+        if (MathUtil.isNear(0, inputAngle.getDegrees(), tolerance))
+        {
+            targetAngle = Rotation2d.fromDegrees(0);
+        } else if (MathUtil.isNear(-45, inputAngle.getDegrees(), tolerance)) {
+            targetAngle = Rotation2d.fromDegrees(-45);
+        } else if (MathUtil.isNear(-90, inputAngle.getDegrees(), tolerance)) {
+            targetAngle = Rotation2d.fromDegrees(-90);
+        }else if (MathUtil.isNear(-135, inputAngle.getDegrees(), tolerance)) {
+            targetAngle = Rotation2d.fromDegrees(-135);
+        }else if (MathUtil.isNear(-180, inputAngle.getDegrees(), tolerance)) {
+            targetAngle = Rotation2d.fromDegrees(-180);
+        }else if (MathUtil.isNear(135, inputAngle.getDegrees(), tolerance)) {
+            targetAngle = Rotation2d.fromDegrees(135);
+        }else if (MathUtil.isNear(90, inputAngle.getDegrees(), tolerance)) {
+            targetAngle = Rotation2d.fromDegrees(90);
+        }else if (MathUtil.isNear(45, inputAngle.getDegrees(), tolerance)) {
+            targetAngle = Rotation2d.fromDegrees(45);
+        }else {
+            use = false;
+            targetAngle = Rotation2d.fromDegrees(0);
+        }
 
         if (use)
         {
-            DrivetrainSubsystem.getInstance().setTargetAngle(new Rotation2d(thetaY,thetaX));
+            DrivetrainSubsystem.getInstance().setTargetAngle(targetAngle);
         }else{
             DrivetrainSubsystem.getInstance().setTargetAngle(DrivetrainSubsystem.getInstance().getFiledRelativeOrientationOfRobot());
         }

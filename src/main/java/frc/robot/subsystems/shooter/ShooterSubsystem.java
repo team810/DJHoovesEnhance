@@ -1,9 +1,6 @@
 package frc.robot.subsystems.shooter;
 
 
-import edu.wpi.first.wpilibj.RobotState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.lib.AdvancedSubsystem;
 import org.littletonrobotics.junction.Logger;
@@ -64,8 +61,8 @@ public class ShooterSubsystem extends AdvancedSubsystem {
                 bottomTargetSpeed = -2000;
             }
             case Amp -> {
-                topTargetSpeed = 1800;
-                bottomTargetSpeed = 1800;
+                topTargetSpeed = 2500;
+                bottomTargetSpeed = 2500;
             }
             case Tape -> {
                 topTargetSpeed = 4000;

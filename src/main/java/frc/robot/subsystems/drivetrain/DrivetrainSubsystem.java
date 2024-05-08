@@ -65,6 +65,9 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
 
     private DrivetrainSubsystem() {
         gyro = new Pigeon2(DrivetrainConstants.GYRO_ID);
+        gyro.reset();
+
+
         Shuffleboard.getTab("Drivetrain").add("PigeonGyro", gyro);
 
         frontLeft = new SwerveModule(new SwerveModuleDetails(
@@ -130,7 +133,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, gyro.getRotation2d(), getModulePositions(), new Pose2d());
         poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
 
-        headingController = new ProfiledPIDController(40,0,1,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION), Robot.defaultPeriodSecs);
+        headingController = new ProfiledPIDController(15,0,1.5,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION), Robot.defaultPeriodSecs);
         headingController.enableContinuousInput(-Math.PI, Math.PI);
         headingController.setTolerance(Math.toRadians(2),0);
 
@@ -207,7 +210,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
                 switch (headingControlMode)
                 {
                     case dpad, rightStick -> {
-                        double plant = headingController.calculate(getFiledRelativeOrientationOfRobot().getRadians(), targetAngle.getRadians());
+                        double plant = -headingController.calculate(getFiledRelativeOrientationOfRobot().getRadians(), targetAngle.getRadians());
                         plant = MathUtil.clamp(plant, -DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_VELOCITY);
 
                         targetSpeeds.omegaRadiansPerSecond = plant;
