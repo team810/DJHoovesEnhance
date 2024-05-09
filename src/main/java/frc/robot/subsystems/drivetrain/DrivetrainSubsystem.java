@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.Robot;
 import frc.robot.lib.AdvancedSubsystem;
 import frc.robot.lib.LimelightHelpers;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class DrivetrainSubsystem extends AdvancedSubsystem {
@@ -135,7 +136,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
 
         headingController = new ProfiledPIDController(15,0,1.5,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION), Robot.defaultPeriodSecs);
         headingController.enableContinuousInput(-Math.PI, Math.PI);
-        headingController.setTolerance(Math.toRadians(2),0);
+        headingController.setTolerance(Math.toRadians(.5));
 
         headingControlMode = HeadingControlMode.velocity;
         targetAngle = new Rotation2d();
@@ -172,7 +173,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         previousWheelPositions = currentWheelPositions;
 
         currentSpeeds = kinematics.toChassisSpeeds(frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState());
-        gyro.getSimState().addYaw(Rotation2d.fromRadians(currentSpeeds.omegaRadiansPerSecond * Robot.defaultPeriodSecs).getDegrees());
+        gyro.getSimState().addYaw(-Math.toDegrees(currentSpeeds.omegaRadiansPerSecond * Robot.defaultPeriodSecs));
 
         poseEstimator.update(gyro.getRotation2d(), getModulePositions());
 
@@ -212,7 +213,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
                     case dpad, rightStick -> {
                         double plant = -headingController.calculate(getFiledRelativeOrientationOfRobot().getRadians(), targetAngle.getRadians());
                         plant = MathUtil.clamp(plant, -DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_VELOCITY);
-
+                        plant = MathUtil.applyDeadband(plant/DrivetrainConstants.MAX_ANGULAR_VELOCITY,.05) * DrivetrainConstants.MAX_ANGULAR_ACCELERATION;
                         targetSpeeds.omegaRadiansPerSecond = plant;
                     }
                     case velocity -> {
@@ -317,6 +318,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         this.headingControlMode = controlMode;
         headingController.reset(getFiledRelativeOrientationOfRobot().getRadians(), gyro.getRate());
     }
+    @AutoLogOutput
     public Rotation2d getTargetAngle() {
         return targetAngle;
     }

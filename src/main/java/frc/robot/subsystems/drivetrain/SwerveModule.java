@@ -24,7 +24,7 @@ class SwerveModule {
     private DrivetrainSubsystem.SpeedMode mode;
     private final SwerveModuleDetails details;
 
-    private double moduleAcceleration; // RPM
+    private double moduleAcceleration; // RPM^2
     private double moduleVelocity; // RPM
     private double lastVelocity;
     private double lastTimeStamp;

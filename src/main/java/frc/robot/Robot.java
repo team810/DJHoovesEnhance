@@ -2,6 +2,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -14,12 +17,14 @@ import frc.robot.commands.intake.IntakeRevCommand;
 import frc.robot.commands.intake.IntakeSourceCommand;
 import frc.robot.commands.swerve.DPadTurn;
 import frc.robot.commands.swerve.HeadingTelopController;
+import frc.robot.commands.swerve.TeleopController;
 import frc.robot.lib.MechanismState;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.deflector.DeflectorSubsystem;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import frc.robot.subsystems.intake.IntakeStates;
 import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.laser.LaserState;
 import frc.robot.subsystems.laser.LaserSubsystem;
 import frc.robot.subsystems.shooter.ShooterMode;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
@@ -33,10 +38,25 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot
 {
     private Command autonomousCommand;
-    double previseTime;
+    enum DrivingMode
+    {
+        NormalPerson,
+        WeirdPerson
+    }
+    private final SendableChooser<DrivingMode> DriveMode = new SendableChooser<>();
+    private final ShuffleboardTab competitionTab;
     public Robot()
     {
-        super(.012);
+
+        competitionTab = Shuffleboard.getTab("Competition");
+
+        DriveMode.addOption("NormalPerson", DrivingMode.NormalPerson);
+        DriveMode.addOption("WeirdPerson", DrivingMode.WeirdPerson);
+        DriveMode.setDefaultOption("WeirdPerson", DrivingMode.WeirdPerson);
+
+        competitionTab.addDouble("Match Time", DriverStation::getMatchTime);
+        competitionTab.addBoolean("Game Piece Detected", () -> (LaserSubsystem.getInstance().getLaserState() == LaserState.Detected));
+        competitionTab.add("Drive Mode", DriveMode);
     }
 
     @Override
@@ -62,9 +82,9 @@ public class Robot extends LoggedRobot
         TBoneSubsystem.getInstance();
         LaserSubsystem.getInstance();
 
-        setUseTiming(false);
+        setUseTiming(true);
         CommandScheduler.getInstance().unregisterAllSubsystems();
-        CommandScheduler.getInstance().setPeriod(.010);
+        CommandScheduler.getInstance().setPeriod(.015);
 
         new Trigger(IO.getButtonValue(Controls.reset_gyro)).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().resetGyroButton()));
 
@@ -86,18 +106,6 @@ public class Robot extends LoggedRobot
         new Trigger(IO.getButtonValue(Controls.toggleTBone)).toggleOnTrue(new TBoneCommand());
         new Trigger(IO.getButtonValue(Controls.toggleDeflector)).onTrue(new InstantCommand(() -> DeflectorSubsystem.getInstance().toggleDeflectorState()));
 
-
-        new Trigger(IO.getButtonValue(Controls.slowMode)).toggleOnTrue(
-                new InstantCommand(() -> {
-                    if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.slow)
-                    {
-                        DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.normal);
-                    }else{
-                        DrivetrainSubsystem.getInstance().setSpeedMode(DrivetrainSubsystem.SpeedMode.slow);
-                    }
-                })
-        );
-
         new Trigger(IO.getButtonValue(Controls.turningModeToggle)).toggleOnTrue(
                 new InstantCommand(() ->
                 {
@@ -106,13 +114,12 @@ public class Robot extends LoggedRobot
                         DrivetrainSubsystem.getInstance().setHeadingControlMode(DrivetrainSubsystem.HeadingControlMode.velocity);
                     }else{
                         DrivetrainSubsystem.getInstance().setHeadingControlMode(DrivetrainSubsystem.HeadingControlMode.rightStick);
+
                     }
                 })
         );
 
         new Trigger(() -> IO.getDPadPrimary() != -1).whileTrue(new DPadTurn());
-        previseTime = Logger.getRealTimestamp();
-
     }
 
     @Override
@@ -121,9 +128,6 @@ public class Robot extends LoggedRobot
         readPeriodicInputs();
         CommandScheduler.getInstance().run();
         writePeriodicInputs();
-        Logger.recordOutput("TimeDelta", (Logger.getRealTimestamp() - previseTime)/1000000);
-        previseTime = Logger.getRealTimestamp();
-
     }
     public void readPeriodicInputs()
     {
@@ -148,20 +152,6 @@ public class Robot extends LoggedRobot
     }
 
     @Override
-    public void disabledInit() {
-
-    }
-    @Override
-    public void disabledPeriodic() {
-
-    }
-
-    @Override
-    public void disabledExit() {
-
-    }
-
-    @Override
     public void teleopInit()
     {
         if (autonomousCommand != null)
@@ -174,8 +164,12 @@ public class Robot extends LoggedRobot
         IntakeSubsystem.getInstance().setState(IntakeStates.off);
         DeflectorSubsystem.getInstance().setDeflectorState(MechanismState.stored);
 
-//        CommandScheduler.getInstance().schedule(new TeleopController());
-        CommandScheduler.getInstance().schedule(new HeadingTelopController());
+        if (DriveMode.getSelected() == DrivingMode.WeirdPerson)
+        {
+            CommandScheduler.getInstance().schedule(new HeadingTelopController());
+        }else{
+            CommandScheduler.getInstance().schedule(new TeleopController());
+        }
     }
 
     @Override

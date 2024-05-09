@@ -1,5 +1,6 @@
 package frc.robot.IO;
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 
@@ -104,6 +105,11 @@ public abstract class IO {
     public static double getDPadPrimary()
     {
         return primary.getPOV();
+    }
+
+    public static void setPrimaryRumble()
+    {
+        primary.setRumble(GenericHID.RumbleType.kBothRumble, .6);
     }
 }
 
