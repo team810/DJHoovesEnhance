@@ -17,10 +17,6 @@ public enum Controls {
     slowMode,
     normalMode,
 
-    autoAlignPodium,
-    autoAlignAmp,
-    autoAlignSource,
-
     intakeFWD,
     intakeREVS,
     sourceIntake,

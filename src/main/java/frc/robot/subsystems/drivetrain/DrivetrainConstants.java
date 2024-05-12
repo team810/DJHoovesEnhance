@@ -43,13 +43,11 @@ public class DrivetrainConstants
      */
     public static final double DISTANCE_PER_REVOLUTION = Math.PI * WHEEL_DIAMETER;
 
-
-//    public static final double MAX_ANGULAR_VELOCITY = (MAX_VELOCITY / (2 * Math.PI * (DRIVETRAIN_WHEELBASE_METERS/2)) * 2 * Math.PI);
     public static final double MAX_ANGULAR_VELOCITY = MAX_VELOCITY / Math.hypot(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
     public static final double MAX_ANGULAR_ACCELERATION = MAX_ACCELERATION / Math.hypot(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
-    public static final double NORMAL_ANGULAR_VELOCITY = MAX_ANGULAR_VELOCITY;
-    public static final double SLOW_ANGULAR_VELOCITY = MAX_ANGULAR_VELOCITY/2;
+    public static final double NORMAL_ANGULAR_VELOCITY = NORMAL_SPEED / Math.hypot(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
+    public static final double SLOW_ANGULAR_VELOCITY = SLOW_SPEED / Math.hypot(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
     public static final double MAX_ANGULAR_VELOCITY_ACCEPT_VISION_DATA = 2 * Math.PI;
 

@@ -15,7 +15,6 @@ import frc.robot.commands.*;
 import frc.robot.commands.intake.IntakeFwdCommand;
 import frc.robot.commands.intake.IntakeRevCommand;
 import frc.robot.commands.intake.IntakeSourceCommand;
-import frc.robot.commands.swerve.DPadTurn;
 import frc.robot.commands.swerve.HeadingTelopController;
 import frc.robot.commands.swerve.TeleopController;
 import frc.robot.lib.MechanismState;
@@ -47,7 +46,6 @@ public class Robot extends LoggedRobot
     private final ShuffleboardTab competitionTab;
     public Robot()
     {
-
         competitionTab = Shuffleboard.getTab("Competition");
 
         DriveMode.addOption("NormalPerson", DrivingMode.NormalPerson);
@@ -118,8 +116,6 @@ public class Robot extends LoggedRobot
                     }
                 })
         );
-
-        new Trigger(() -> IO.getDPadPrimary() != -1).whileTrue(new DPadTurn());
     }
 
     @Override
@@ -181,10 +177,12 @@ public class Robot extends LoggedRobot
 
     @Override
     public void teleopPeriodic() {
+
     }
 
     @Override
     public void autonomousPeriodic() {
+
     }
 
 }
