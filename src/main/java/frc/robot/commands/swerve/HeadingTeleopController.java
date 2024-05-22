@@ -3,7 +3,6 @@ package frc.robot.commands.swerve;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.proto.Rotation2dProto;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
@@ -12,15 +11,15 @@ import frc.robot.IO.Controls;
 import frc.robot.IO.IO;
 import frc.robot.subsystems.drivetrain.DrivetrainConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
-import org.littletonrobotics.junction.Logger;
 
-public class HeadingTelopController extends Command {
+public class HeadingTeleopController extends Command {
     private final SlewRateLimiter throttleLimiter;
     private final SlewRateLimiter thetaLimiter;
 
     private double invert = 1;
 
-    public HeadingTelopController() {
+    public HeadingTeleopController() {
+
         throttleLimiter = new SlewRateLimiter(DrivetrainConstants.MAX_ACCELERATION);
         thetaLimiter = new SlewRateLimiter(DrivetrainConstants.MAX_ANGULAR_ACCELERATION);
     }
@@ -32,6 +31,7 @@ public class HeadingTelopController extends Command {
         }else{
             invert = 1;
         }
+
         double xHeadingInput;
         double yHeadingInput;
         double thetaInput;
@@ -42,7 +42,7 @@ public class HeadingTelopController extends Command {
         xHeadingInput = IO.getJoystickValue(Controls.headingX).get();
         yHeadingInput = IO.getJoystickValue(Controls.headingY).get();
         throttleInput = IO.getJoystickValue(Controls.throttle).get();
-        thetaInput = IO.getJoystickValue(Controls.drive_theta).get();
+        thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();
 
         xHeadingInput = xHeadingInput * invert;
         yHeadingInput = yHeadingInput * invert;
@@ -82,7 +82,7 @@ public class HeadingTelopController extends Command {
             yVelocity = 0;
         }
 
-        DrivetrainSubsystem.getInstance().setTelopSpeeds(new ChassisSpeeds(xVelocity, yVelocity, thetaVelocity));
+        DrivetrainSubsystem.getInstance().setTeleopSpeeds(new ChassisSpeeds(xVelocity, yVelocity, thetaVelocity));
 
         double thetaX = IO.getJoystickValue(Controls.thetaX).get();
         double thetaY = IO.getJoystickValue(Controls.thetaY).get();
@@ -124,7 +124,7 @@ public class HeadingTelopController extends Command {
 
     @Override
     public void initialize() {
-        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.telop);
+        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.teleop);
     }
 
     @Override

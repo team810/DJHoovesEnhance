@@ -5,9 +5,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.IO.Controls;
 import frc.robot.IO.IO;
@@ -15,7 +13,7 @@ import frc.robot.commands.*;
 import frc.robot.commands.intake.IntakeFwdCommand;
 import frc.robot.commands.intake.IntakeRevCommand;
 import frc.robot.commands.intake.IntakeSourceCommand;
-import frc.robot.commands.swerve.HeadingTelopController;
+import frc.robot.commands.swerve.HeadingTeleopController;
 import frc.robot.commands.swerve.TeleopController;
 import frc.robot.lib.MechanismState;
 import frc.robot.subsystems.climber.ClimberSubsystem;
@@ -39,20 +37,19 @@ public class Robot extends LoggedRobot
     private Command autonomousCommand;
     enum DrivingMode
     {
-        NormalPerson,
-        WeirdPerson
+        Standard,
+        HeadingControl
     }
     private final SendableChooser<DrivingMode> DriveMode = new SendableChooser<>();
-    private final ShuffleboardTab competitionTab;
+
     public Robot()
     {
-        competitionTab = Shuffleboard.getTab("Competition");
+        ShuffleboardTab competitionTab = Shuffleboard.getTab("Competition");
 
-        DriveMode.addOption("NormalPerson", DrivingMode.NormalPerson);
-        DriveMode.addOption("WeirdPerson", DrivingMode.WeirdPerson);
-        DriveMode.setDefaultOption("WeirdPerson", DrivingMode.WeirdPerson);
-
-        competitionTab.addDouble("Match Time", DriverStation::getMatchTime);
+        DriveMode.addOption("Standard", DrivingMode.Standard);
+        DriveMode.addOption("Heading Control", DrivingMode.HeadingControl);
+        DriveMode.setDefaultOption("Heading Control", DrivingMode.HeadingControl);
+        
         competitionTab.addBoolean("Game Piece Detected", () -> (LaserSubsystem.getInstance().getLaserState() == LaserState.Detected));
         competitionTab.add("Drive Mode", DriveMode);
     }
@@ -86,7 +83,13 @@ public class Robot extends LoggedRobot
 
         new Trigger(IO.getButtonValue(Controls.reset_gyro)).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().resetGyroButton()));
 
-        new Trigger(IO.getButtonValue(Controls.intakeFWD)).whileTrue(new IntakeFwdCommand());
+        new Trigger(IO.getButtonValue(Controls.intakeFWD)).whileTrue(new SequentialCommandGroup(
+                new IntakeFwdCommand(),
+                new InstantCommand(() -> IntakeSubsystem.getInstance().setState(IntakeStates.rev)),
+                new WaitCommand(.1),
+                new InstantCommand(() -> IntakeSubsystem.getInstance().setState(IntakeStates.off))
+        ));
+
         new Trigger(IO.getButtonValue(Controls.intakeREVS)).whileTrue(new IntakeRevCommand());
         new Trigger(IO.getButtonValue(Controls.sourceIntake)).whileTrue(new IntakeSourceCommand());
 
@@ -107,11 +110,11 @@ public class Robot extends LoggedRobot
         new Trigger(IO.getButtonValue(Controls.turningModeToggle)).toggleOnTrue(
                 new InstantCommand(() ->
                 {
-                    if (DrivetrainSubsystem.getInstance().getControlMode() == DrivetrainSubsystem.HeadingControlMode.rightStick)
+                    if (DrivetrainSubsystem.getInstance().getControlMode() == DrivetrainSubsystem.YawControlMode.rightStick)
                     {
-                        DrivetrainSubsystem.getInstance().setHeadingControlMode(DrivetrainSubsystem.HeadingControlMode.velocity);
+                        DrivetrainSubsystem.getInstance().setYawControlMode(DrivetrainSubsystem.YawControlMode.velocity);
                     }else{
-                        DrivetrainSubsystem.getInstance().setHeadingControlMode(DrivetrainSubsystem.HeadingControlMode.rightStick);
+                        DrivetrainSubsystem.getInstance().setYawControlMode(DrivetrainSubsystem.YawControlMode.rightStick);
 
                     }
                 })
@@ -160,9 +163,9 @@ public class Robot extends LoggedRobot
         IntakeSubsystem.getInstance().setState(IntakeStates.off);
         DeflectorSubsystem.getInstance().setDeflectorState(MechanismState.stored);
 
-        if (DriveMode.getSelected() == DrivingMode.WeirdPerson)
+        if (DriveMode.getSelected() == DrivingMode.HeadingControl)
         {
-            CommandScheduler.getInstance().schedule(new HeadingTelopController());
+            CommandScheduler.getInstance().schedule(new HeadingTeleopController());
         }else{
             CommandScheduler.getInstance().schedule(new TeleopController());
         }

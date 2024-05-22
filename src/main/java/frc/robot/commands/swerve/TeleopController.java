@@ -58,8 +58,8 @@ public class TeleopController extends Command {
             yInput = linerVelocityCalc.getY() * DrivetrainConstants.SLOW_SPEED;
             thetaInput = thetaInput * DrivetrainConstants.SLOW_ANGULAR_VELOCITY;
         }
-        DrivetrainSubsystem.getInstance().setTelopSpeeds(
-                new ChassisSpeeds(
+        DrivetrainSubsystem.getInstance().setTeleopSpeeds(
+               new ChassisSpeeds(
                     yInput,
                     xInput,
                     thetaInput
@@ -119,7 +119,7 @@ public class TeleopController extends Command {
     }
     @Override
     public void initialize() {
-        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.telop);
+        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.teleop);
         if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
             invert = -1;
         }

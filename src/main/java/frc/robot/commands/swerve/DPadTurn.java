@@ -11,7 +11,7 @@ public class DPadTurn extends Command {
 
     @Override
     public void initialize() {
-        DrivetrainSubsystem.getInstance().setHeadingControlMode(DrivetrainSubsystem.HeadingControlMode.dpad);
+        DrivetrainSubsystem.getInstance().setYawControlMode(DrivetrainSubsystem.YawControlMode.dpad);
         execute();
     }
 
@@ -24,7 +24,7 @@ public class DPadTurn extends Command {
             rot = Rotation2d.fromRadians(MathUtil.angleModulus(rot.getRadians()));
             DrivetrainSubsystem.getInstance().setTargetAngle(rot);
         }else{
-            DrivetrainSubsystem.getInstance().setHeadingControlMode(DrivetrainSubsystem.HeadingControlMode.velocity);
+            DrivetrainSubsystem.getInstance().setYawControlMode(DrivetrainSubsystem.YawControlMode.velocity);
         }
     }
 
@@ -35,7 +35,7 @@ public class DPadTurn extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        DrivetrainSubsystem.getInstance().setHeadingControlMode(DrivetrainSubsystem.HeadingControlMode.velocity);
-        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.telop);
+        DrivetrainSubsystem.getInstance().setYawControlMode(DrivetrainSubsystem.YawControlMode.velocity);
+        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.teleop);
     }
 }
