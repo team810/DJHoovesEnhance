@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.auto.AutoBuilder;
 import frc.robot.IO.Controls;
 import frc.robot.IO.IO;
 import frc.robot.commands.*;
@@ -19,6 +20,7 @@ import frc.robot.lib.MechanismState;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.deflector.DeflectorSubsystem;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
+import frc.robot.subsystems.drivetrain.DrivingMode;
 import frc.robot.subsystems.intake.IntakeStates;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.laser.LaserState;
@@ -35,12 +37,8 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot
 {
     private Command autonomousCommand;
-    enum DrivingMode
-    {
-        Standard,
-        HeadingControl
-    }
     private final SendableChooser<DrivingMode> DriveMode = new SendableChooser<>();
+    private AutoBuilder autoBuilder;
 
     public Robot()
     {
@@ -52,6 +50,7 @@ public class Robot extends LoggedRobot
         
         competitionTab.addBoolean("Game Piece Detected", () -> (LaserSubsystem.getInstance().getLaserState() == LaserState.Detected));
         competitionTab.add("Drive Mode", DriveMode);
+
     }
 
     @Override
@@ -119,6 +118,8 @@ public class Robot extends LoggedRobot
                     }
                 })
         );
+
+        autoBuilder = new AutoBuilder();
     }
 
     @Override
@@ -176,6 +177,11 @@ public class Robot extends LoggedRobot
     {
         autonomousCommand = AutoBuilder.getAuto();
         autonomousCommand.schedule();
+    }
+
+    @Override
+    public void disabledPeriodic() {
+        autoBuilder.periodic();
     }
 
     @Override

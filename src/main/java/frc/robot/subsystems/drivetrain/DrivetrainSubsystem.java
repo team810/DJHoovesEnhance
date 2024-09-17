@@ -143,9 +143,9 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         swerveController = new SwerveTrajectoryController(
                 new PIDController(7,0,0),
                 new PIDController(7,0,0),
-                new PIDController(10,0,0)
+                new PIDController(10,0,0),
+                true
         );
-        trajectoryState = new ChoreoTrajectoryState(0,0,0,0,0,0,0);
         Shuffleboard.getTab("Drivetrain").add(yawController);
     }
 
@@ -169,8 +169,6 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         currentSpeeds = kinematics.toChassisSpeeds(frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState());
         gyro.getSimState().addYaw(-Math.toDegrees(currentSpeeds.omegaRadiansPerSecond * Robot.defaultPeriodSecs));
 
-        poseEstimator.update(gyro.getRotation2d(), getModulePositions());
-
         boolean reject = false;
 
         LimelightHelpers.SetRobotOrientation(DrivetrainConstants.LimeLightName, poseEstimator.getEstimatedPosition().getRotation().getDegrees(), gyro.getRate(),0, 0, 0, 0);
@@ -190,6 +188,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
                     mt2.pose,
                     mt2.timestampSeconds);
         }
+        poseEstimator.update(gyro.getRotation2d(), getModulePositions()); // updating pose estimation
     }
 
     @Override
@@ -284,10 +283,6 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     }
     public void setTeleopSpeeds(ChassisSpeeds speeds) {this.teleopSpeeds = speeds;}
     public SpeedMode getSpeedMode() {return speedMode;}
-    public void setYaw(double yaw)
-    {
-        gyro.setYaw(yaw);
-    }
     public void resetGyroButton() {
         if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red)
         {
@@ -305,18 +300,20 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         return this.swerveController.atReference();
     }
     public ChassisSpeeds getCurrentSpeeds() {return currentSpeeds;}
-    public YawControlMode getControlMode() {
-        return yawControlMode;
-    }
+
     public void setYawControlMode(YawControlMode controlMode) {
         this.yawControlMode = controlMode;
         yawController.reset(getFiledRelativeOrientationOfRobot().getRadians(), gyro.getRate());
     }
-    public Rotation2d getTargetAngle() {
-        return targetAngle;
+    public YawControlMode getControlMode() {
+        return yawControlMode;
     }
+
     public void setTargetAngle(Rotation2d targetAngle) {
         this.targetAngle = targetAngle;
+    }
+    public Rotation2d getTargetAngle() {
+        return targetAngle;
     }
 
     public enum DrivetrainMode
