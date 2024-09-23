@@ -34,9 +34,9 @@ public class AutoBuilder {
         // Start building autos
         AutoRoutine middle = new AutoRoutine("middle");
         middle.command = new SequentialCommandGroup(
-                new InstantCommand(() -> ShooterSubsystem.getInstance().setShooterMode(ShooterMode.Subwoofer));
+                new InstantCommand(() -> ShooterSubsystem.getInstance().setShooterMode(ShooterMode.Subwoofer)),
                 new WaitCommand(.75),
-                new FireCommand(),
+                new FireCommand()
         );
         autoRoutines.put(Autos.MIDDLE, middle);
     }

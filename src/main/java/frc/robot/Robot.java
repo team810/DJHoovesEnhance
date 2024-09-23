@@ -38,7 +38,6 @@ public class Robot extends LoggedRobot
 {
     private Command autonomousCommand;
     private final SendableChooser<DrivingMode> DriveMode = new SendableChooser<>();
-    private AutoBuilder autoBuilder;
 
     public Robot()
     {
@@ -118,8 +117,6 @@ public class Robot extends LoggedRobot
                     }
                 })
         );
-
-        autoBuilder = new AutoBuilder();
     }
 
     @Override
@@ -181,7 +178,7 @@ public class Robot extends LoggedRobot
 
     @Override
     public void disabledPeriodic() {
-        autoBuilder.periodic();
+
     }
 
     @Override

@@ -146,6 +146,9 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
                 new PIDController(10,0,0),
                 true
         );
+
+
+        trajectoryState = new ChoreoTrajectoryState(0,0,0,0,0,0,0,new double[]{0,0,0,0},new double[]{0,0,0,0});
         Shuffleboard.getTab("Drivetrain").add(yawController);
     }
 

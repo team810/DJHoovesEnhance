@@ -20,11 +20,15 @@ public class DrivetrainConstants
 
     public static final int GYRO_ID = 21;
 
-    public static final double MAX_VELOCITY = 4.6; // MPS
+//    public static final double MAX_VELOCITY = 4.6; // MPS
+//    public static final double MAX_ACCELERATION = 7; // MPS
+//    public static final double DRIVE_GEAR_RATIO = 6.75;
+//
+    public static final double MAX_VELOCITY = 5.9; // MPS
     public static final double MAX_ACCELERATION = 7; // MPS
-    public static final double DRIVE_GEAR_RATIO = 6.75;
+    public static final double DRIVE_GEAR_RATIO = 5.36;
 
-    public static final double NORMAL_SPEED = 4.6;
+    public static final double NORMAL_SPEED = 5.9;
     public static final double SLOW_SPEED = 2;
     /**
      * The measurement of the front Left wheel to the front right wheel or the back left wheel to the back right wheel
