@@ -49,7 +49,6 @@ public class Robot extends LoggedRobot
         
         competitionTab.addBoolean("Game Piece Detected", () -> (LaserSubsystem.getInstance().getLaserState() == LaserState.Detected));
         competitionTab.add("Drive Mode", DriveMode);
-
     }
 
     @Override
@@ -87,6 +86,10 @@ public class Robot extends LoggedRobot
                 new WaitCommand(.1),
                 new InstantCommand(() -> IntakeSubsystem.getInstance().setState(IntakeStates.off))
         ));
+
+        new Trigger(IO.getButtonValue(Controls.intakeFWD)).toggleOnFalse(
+          new InstantCommand(() -> IntakeSubsystem.getInstance().setState(IntakeStates.off))
+        );
 
         new Trigger(IO.getButtonValue(Controls.intakeREVS)).whileTrue(new IntakeRevCommand());
         new Trigger(IO.getButtonValue(Controls.sourceIntake)).whileTrue(new IntakeSourceCommand());
@@ -177,18 +180,20 @@ public class Robot extends LoggedRobot
     }
 
     @Override
-    public void disabledPeriodic() {
+    public void disabledPeriodic()
+    {
 
     }
 
     @Override
-    public void teleopPeriodic() {
+    public void teleopPeriodic()
+    {
 
     }
 
     @Override
-    public void autonomousPeriodic() {
+    public void autonomousPeriodic()
+    {
 
     }
-
 }

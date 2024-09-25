@@ -1,6 +1,7 @@
 package frc.robot.subsystems.deflector;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Solenoid;
 import frc.robot.util.Pneumatics;
 import org.littletonrobotics.junction.Logger;
 

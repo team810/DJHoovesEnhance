@@ -1,6 +1,5 @@
 package frc.robot.auto;
 
-import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -9,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.FireCommand;
-import frc.robot.commands.RevSpeakerCommand;
 import frc.robot.subsystems.shooter.ShooterMode;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 
@@ -39,6 +37,7 @@ public class AutoBuilder {
                 new FireCommand()
         );
         autoRoutines.put(Autos.MIDDLE, middle);
+
     }
 
     public void periodic() // Only should be run when disabled

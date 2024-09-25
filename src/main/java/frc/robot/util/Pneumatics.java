@@ -3,9 +3,9 @@ package frc.robot.util;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsControlModule;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.Solenoid;
 
-public class Pneumatics extends SubsystemBase {
+public class Pneumatics {
     private static Pneumatics INSTANCE;
     public static Pneumatics getInstance() {
         if (INSTANCE == null) {
@@ -27,11 +27,6 @@ public class Pneumatics extends SubsystemBase {
         return pcm.makeDoubleSolenoid(fwd,back);
     }
 
-
-    @Override
-    public void periodic() {
-
-
-    }
+    public Solenoid createSolenoid(int channel) {return pcm.makeSolenoid(channel);}
 }
 
