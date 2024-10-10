@@ -7,9 +7,10 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.auto.AutoBuilder;
 import frc.robot.IO.Controls;
 import frc.robot.IO.IO;
+import frc.robot.auto.Auto;
+import frc.robot.auto.Autos;
 import frc.robot.commands.*;
 import frc.robot.commands.intake.IntakeFwdCommand;
 import frc.robot.commands.intake.IntakeRevCommand;
@@ -38,6 +39,9 @@ public class Robot extends LoggedRobot
 {
     private Command autonomousCommand;
     private final SendableChooser<DrivingMode> DriveMode = new SendableChooser<>();
+    private final SendableChooser<Autos> AutoChooser = new SendableChooser<>();
+    private Auto autos;
+    private DriverStation.Alliance alliance;
 
     public Robot()
     {
@@ -45,10 +49,24 @@ public class Robot extends LoggedRobot
 
         DriveMode.addOption("Standard", DrivingMode.Standard);
         DriveMode.addOption("Heading Control", DrivingMode.HeadingControl);
-        DriveMode.setDefaultOption("Heading Control", DrivingMode.HeadingControl);
-        
+        DriveMode.setDefaultOption("Standard", DrivingMode.Standard);
+//        DriveMode.setDefaultOption("Heading Control", DrivingMode.HeadingControl);
+
+        AutoChooser.addOption("None", Autos.None);
+        AutoChooser.addOption("ShootOnly", Autos.ShotOnly);
+        AutoChooser.addOption("Middle",Autos.Middle);
+        AutoChooser.addOption("Four Amp Side", Autos.FourAmp);
+
         competitionTab.addBoolean("Game Piece Detected", () -> (LaserSubsystem.getInstance().getLaserState() == LaserState.Detected));
         competitionTab.add("Drive Mode", DriveMode);
+        competitionTab.add("Auto", AutoChooser);
+
+        if (DriverStation.getAlliance().isPresent())
+        {
+            alliance = DriverStation.getAlliance().get();
+        }else{
+            alliance = DriverStation.Alliance.Red;
+        }
     }
 
     @Override
@@ -66,6 +84,7 @@ public class Robot extends LoggedRobot
         Logger.start();
 
         IO.Initialize(IO.PrimaryDriverProfiles.Leo, IO.SecondaryDriverProfiles.KnollJoystick);
+//        IO.Initialize(IO.PrimaryDriverProfiles.Leo, IO.SecondaryDriverProfiles.KnollController);
 
         DrivetrainSubsystem.getInstance();
         ShooterSubsystem.getInstance();
@@ -120,6 +139,7 @@ public class Robot extends LoggedRobot
                     }
                 })
         );
+        autos = new Auto();
     }
 
     @Override
@@ -175,20 +195,32 @@ public class Robot extends LoggedRobot
     @Override
     public void autonomousInit()
     {
-        autonomousCommand = AutoBuilder.getAuto();
-        autonomousCommand.schedule();
+        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.trajectory);
+        autos.getAuto(Autos.FourAmp).schedule();
+//        autonomousCommand.schedule();
     }
 
     @Override
     public void disabledPeriodic()
     {
-
+        if (DriverStation.getAlliance().isPresent())
+        {
+            if (DriverStation.getAlliance().get() != alliance)
+            {
+                autos.reloadPaths();
+            }
+        }
     }
 
     @Override
     public void teleopPeriodic()
     {
 
+    }
+
+    @Override
+    public void autonomousExit() {
+        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.off);
     }
 
     @Override

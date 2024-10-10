@@ -37,7 +37,7 @@ public class LaserSubsystem extends AdvancedSubsystem {
         {
             distance = sensor.getMeasurement().distance_mm;
         }else{
-            distance = 0;
+            distance = 30;
         }
         if (MathUtil.isNear(LaserConstants.EXPECTED_DISTANCE, distance, LaserConstants.TOLERANCE))
         {

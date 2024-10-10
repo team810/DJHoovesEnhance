@@ -1,6 +1,9 @@
 package frc.robot.auto;
 
 public enum Autos {
-    NONE,
-    MIDDLE
+    None,
+    ShotOnly,
+    Middle,
+    FourAmp,
+    MoveStraight, // This auto is just meant to get mobility points.
 }

@@ -30,7 +30,7 @@ public class DrivetrainConstants
 //    public static final double MAX_ACCELERATION = 7; // MPS
 //    public static final double DRIVE_GEAR_RATIO = 5.36;
 
-    public static final double NORMAL_SPEED = 5.9;
+    public static final double NORMAL_SPEED = 4.6;
     public static final double SLOW_SPEED = 2;
     /**
      * The measurement of the front Left wheel to the front right wheel or the back left wheel to the back right wheel
@@ -58,4 +58,6 @@ public class DrivetrainConstants
     public static final double MAX_ANGULAR_VELOCITY_ACCEPT_VISION_DATA = 2 * Math.PI;
 
     public static final String LimeLightName = "limelight";
+
+    public static final double MAX_AUTO_SPEED = 4.0;
 }

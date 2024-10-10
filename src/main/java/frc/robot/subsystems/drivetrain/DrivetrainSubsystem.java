@@ -1,11 +1,9 @@
 package frc.robot.subsystems.drivetrain;
 
-import com.choreo.lib.ChoreoTrajectoryState;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.CANSparkBase;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,6 +12,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.Robot;
@@ -60,8 +59,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     private Rotation2d targetAngle;
     private YawControlMode yawControlMode;
 
-    private final SwerveTrajectoryController swerveController;
-    private ChoreoTrajectoryState trajectoryState;
+    private ChassisSpeeds trajectorySpeeds;
 
     private DrivetrainSubsystem() {
         gyro = new Pigeon2(DrivetrainConstants.GYRO_ID);
@@ -127,8 +125,11 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         backLeft.setIdleMode(CANSparkBase.IdleMode.kBrake);
         backRight.setIdleMode(CANSparkBase.IdleMode.kBrake);
 
-        poseEstimator = new SwerveDrivePoseEstimator(kinematics, gyro.getRotation2d(), getModulePositions(), new Pose2d());
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, gyro.getRotation2d(), getModulePositions(), new Pose2d(1.3,5.5,new Rotation2d()));
         poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+
+        LimelightHelpers.Flush();
+        LimelightHelpers.setCameraPose_RobotSpace(DrivetrainConstants.LimeLightName, 0, Units.inchesToMeters(5),Units.inchesToMeters(26),-4,30,180);
 
         yawController = new ProfiledPIDController(15,0,1.5,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION), Robot.defaultPeriodSecs);
         yawController.enableContinuousInput(-Math.PI, Math.PI);
@@ -140,15 +141,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         previousWheelPositions = new SwerveDriveWheelPositions(getModulePositions());
         currentWheelPositions = new SwerveDriveWheelPositions(getModulePositions());
 
-        swerveController = new SwerveTrajectoryController(
-                new PIDController(7,0,0),
-                new PIDController(7,0,0),
-                new PIDController(10,0,0),
-                true
-        );
-
-
-        trajectoryState = new ChoreoTrajectoryState(0,0,0,0,0,0,0,new double[]{0,0,0,0},new double[]{0,0,0,0});
+        trajectorySpeeds = new ChassisSpeeds(0,0,0);
         Shuffleboard.getTab("Drivetrain").add(yawController);
     }
 
@@ -170,26 +163,29 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         previousWheelPositions = currentWheelPositions;
 
         currentSpeeds = kinematics.toChassisSpeeds(frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState());
-        gyro.getSimState().addYaw(-Math.toDegrees(currentSpeeds.omegaRadiansPerSecond * Robot.defaultPeriodSecs));
+        gyro.getSimState().addYaw(Math.toDegrees(currentSpeeds.omegaRadiansPerSecond * Robot.defaultPeriodSecs));
 
-        boolean reject = false;
+        if (Robot.isReal())
+        {
+            boolean reject = false;
 
-        LimelightHelpers.SetRobotOrientation(DrivetrainConstants.LimeLightName, poseEstimator.getEstimatedPosition().getRotation().getDegrees(), gyro.getRate(),0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(DrivetrainConstants.LimeLightName);
+            LimelightHelpers.SetRobotOrientation(DrivetrainConstants.LimeLightName, poseEstimator.getEstimatedPosition().getRotation().getDegrees(), gyro.getRate(),0, 0, 0, 0);
+            LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(DrivetrainConstants.LimeLightName);
 
-        if(Math.abs(Math.toRadians(gyro.getRate())) > DrivetrainConstants.MAX_ANGULAR_VELOCITY_ACCEPT_VISION_DATA)
-        {
-            reject = true;
-        }
-        if(mt2.tagCount == 0)
-        {
-            reject = true;
-        }
-        if(!reject)
-        {
-            poseEstimator.addVisionMeasurement(
-                    mt2.pose,
-                    mt2.timestampSeconds);
+            if(Math.abs(Math.toRadians(gyro.getRate())) > DrivetrainConstants.MAX_ANGULAR_VELOCITY_ACCEPT_VISION_DATA)
+            {
+                reject = true;
+            }
+            if(mt2.tagCount == 0)
+            {
+                reject = true;
+            }
+            if(!reject)
+            {
+                poseEstimator.addVisionMeasurement(
+                        mt2.pose,
+                        mt2.timestampSeconds);
+            }
         }
         poseEstimator.update(gyro.getRotation2d(), getModulePositions()); // updating pose estimation
     }
@@ -200,7 +196,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         {
             case trajectory ->
             {
-                targetSpeeds = swerveController.calculate(getRobotPose(), trajectoryState);
+                targetSpeeds = trajectorySpeeds;
             }
             case teleop -> {
                 targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(teleopSpeeds,getFiledRelativeOrientationOfRobot());
@@ -251,9 +247,6 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         Logger.recordOutput("Drivetrain/Current/Speeds", currentSpeeds);
         Logger.recordOutput("Drivetrain/Current/Twist", currentTwist);
 
-        Logger.recordOutput("Drivetrain/Trajectory/AtReference", swerveControllerAtReference());
-        Logger.recordOutput("Drivetrain/Trajectory/TargetPose", trajectoryState.getPose());
-
         Logger.recordOutput("Drivetrain/SpeedMode", speedMode);
         Logger.recordOutput("Drivetrain/Mode", drivetrainMode);
         Logger.recordOutput("Drivetrain/RobotPose", getRobotPose());
@@ -261,6 +254,9 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
 
         Logger.recordOutput("Drivetrain/RotationControl/Mode", yawControlMode.toString());
         Logger.recordOutput("Drivetrain/RotationControl/TargetAngle", targetAngle);
+        Logger.recordOutput("RotationRaw/rot", gyro.getRotation2d().getDegrees());
+        Logger.recordOutput("Drivetrain/TrajectorySpeeds", trajectorySpeeds);
+        Logger.recordOutput("Drivetrain/TargetSpeeds", targetSpeeds);
     }
 
     private SwerveModulePosition[] getModulePositions() {return new SwerveModulePosition[]{frontLeftPosition, frontRightPosition, backLeftPosition, backRightPosition};}
@@ -295,14 +291,8 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         }
     }
     public SwerveDriveKinematics getKinematics(){return kinematics;}
-    public void setTrajectoryState(ChoreoTrajectoryState trajectoryState) {
-        this.trajectoryState = trajectoryState;
-    }
-    public boolean swerveControllerAtReference()
-    {
-        return this.swerveController.atReference();
-    }
-    public ChassisSpeeds getCurrentSpeeds() {return currentSpeeds;}
+    public void setTrajectorySpeeds(ChassisSpeeds speeds) {this.trajectorySpeeds = speeds;}
+    public ChassisSpeeds getCurrentSpeeds() {return kinematics.toChassisSpeeds(new SwerveModuleState[]{frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState()});}
 
     public void setYawControlMode(YawControlMode controlMode) {
         this.yawControlMode = controlMode;
@@ -311,12 +301,8 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     public YawControlMode getControlMode() {
         return yawControlMode;
     }
-
     public void setTargetAngle(Rotation2d targetAngle) {
         this.targetAngle = targetAngle;
-    }
-    public Rotation2d getTargetAngle() {
-        return targetAngle;
     }
 
     public enum DrivetrainMode
@@ -325,7 +311,6 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         teleop,
         off
     }
-
     public enum YawControlMode
     {
         velocity,

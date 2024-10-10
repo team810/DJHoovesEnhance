@@ -31,6 +31,12 @@ public class TeleopController extends Command {
 
     @Override
     public void execute() {
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+            invert = -1;
+        }else{
+            invert = 1;
+        }
+
         double xInput = -IO.getJoystickValue(Controls.drive_x).get();
         double yInput = -IO.getJoystickValue(Controls.drive_y).get();
         double thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();

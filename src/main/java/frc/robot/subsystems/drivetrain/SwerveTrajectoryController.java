@@ -1,10 +1,8 @@
 package frc.robot.subsystems.drivetrain;
 
-import com.choreo.lib.ChoreoTrajectoryState;
+
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 public class SwerveTrajectoryController {
@@ -33,28 +31,28 @@ public class SwerveTrajectoryController {
         Shuffleboard.getTab("Swerve").add("thetaController", thetaController);
     }
 
-    public ChassisSpeeds calculate(Pose2d currentPose, ChoreoTrajectoryState trajectoryState)
-    {
-        double xFF, yFF, thetaFF;
-        double xFeedback, yFeedback, thetaFeedback;
-
-        xFF = trajectoryState.velocityX;
-        yFF = trajectoryState.velocityY;
-        thetaFF = trajectoryState.angularVelocity;
-
-        xFeedback = 0;
-        yFeedback = 0;
-        thetaFeedback = 0;
-
-        if (useFeedback)
-        {
-            xFeedback = xController.calculate(currentPose.getX(), trajectoryState.x);
-            yFeedback = yController.calculate(currentPose.getY(), trajectoryState.y);
-            thetaFeedback = thetaController.calculate(currentPose.getRotation().getRadians(), trajectoryState.getPose().getRotation().getRadians());
-        }
-
-        return ChassisSpeeds.fromFieldRelativeSpeeds(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback, currentPose.getRotation());
-    }
+//    public ChassisSpeeds calculate(Pose2d currentPose, ChoreoTrajectoryState trajectoryState)
+//    {
+//        double xFF, yFF, thetaFF;
+//        double xFeedback, yFeedback, thetaFeedback;
+//
+//        xFF = 0;
+//        yFF = 0;
+//        thetaFF = 0;
+//
+//        xFeedback = 0;
+//        yFeedback = 0;
+//        thetaFeedback = 0;
+//
+//        if (useFeedback)
+//        {
+//            xFeedback = xController.calculate(currentPose.getX(), trajectoryState.x);
+//            yFeedback = yController.calculate(currentPose.getY(), trajectoryState.y);
+//            thetaFeedback = thetaController.calculate(currentPose.getRotation().getRadians(), trajectoryState.getPose().getRotation().getRadians());
+//        }
+//
+//        return ChassisSpeeds.fromFieldRelativeSpeeds(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback, currentPose.getRotation());
+//    }
 
     public boolean atReference()
     {
