@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.constraint.SwerveDriveKinematicsConstraint;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -44,6 +45,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
     private SwerveModuleState backRightTargetState;
 
     private final SwerveDriveKinematics kinematics;
+    private final SwerveDriveKinematicsConstraint kinematicsConstraint;
 
     private ChassisSpeeds targetSpeeds;
     private ChassisSpeeds teleopSpeeds;
@@ -104,6 +106,8 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
                         -DrivetrainConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0)
         );
 
+        kinematicsConstraint = new SwerveDriveKinematicsConstraint(kinematics,DrivetrainConstants.MAX_AUTO_SPEED);
+
         frontLeftTargetState = new SwerveModuleState();
         frontRightTargetState = new SwerveModuleState();
         backLeftTargetState = new SwerveModuleState();
@@ -128,7 +132,6 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, gyro.getRotation2d(), getModulePositions(), new Pose2d(1.3,5.5,new Rotation2d()));
         poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
 
-        LimelightHelpers.Flush();
         LimelightHelpers.setCameraPose_RobotSpace(DrivetrainConstants.LimeLightName, 0, Units.inchesToMeters(5),Units.inchesToMeters(26),-4,30,180);
 
         yawController = new ProfiledPIDController(15,0,1.5,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION), Robot.defaultPeriodSecs);
@@ -163,28 +166,34 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         previousWheelPositions = currentWheelPositions;
 
         currentSpeeds = kinematics.toChassisSpeeds(frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState());
-        gyro.getSimState().addYaw(Math.toDegrees(currentSpeeds.omegaRadiansPerSecond * Robot.defaultPeriodSecs));
+        if (Robot.isSimulation())
+        {
+            gyro.getSimState().addYaw(Math.toDegrees(currentSpeeds.omegaRadiansPerSecond * Robot.defaultPeriodSecs));
+        }
 
-        if (Robot.isReal())
+        if (true)
         {
             boolean reject = false;
 
             LimelightHelpers.SetRobotOrientation(DrivetrainConstants.LimeLightName, poseEstimator.getEstimatedPosition().getRotation().getDegrees(), gyro.getRate(),0, 0, 0, 0);
             LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(DrivetrainConstants.LimeLightName);
 
-            if(Math.abs(Math.toRadians(gyro.getRate())) > DrivetrainConstants.MAX_ANGULAR_VELOCITY_ACCEPT_VISION_DATA)
+            if (mt2 != null)
             {
-                reject = true;
-            }
-            if(mt2.tagCount == 0)
-            {
-                reject = true;
-            }
-            if(!reject)
-            {
-                poseEstimator.addVisionMeasurement(
-                        mt2.pose,
-                        mt2.timestampSeconds);
+                if(Math.abs(Math.toRadians(gyro.getRate())) > DrivetrainConstants.MAX_ANGULAR_VELOCITY_ACCEPT_VISION_DATA)
+                {
+                    reject = true;
+                }
+                if(mt2.tagCount == 0)
+                {
+                    reject = true;
+                }
+                if(!reject)
+                {
+                    poseEstimator.addVisionMeasurement(
+                            mt2.pose,
+                            mt2.timestampSeconds);
+                }
             }
         }
         poseEstimator.update(gyro.getRotation2d(), getModulePositions()); // updating pose estimation
@@ -197,6 +206,9 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
             case trajectory ->
             {
                 targetSpeeds = trajectorySpeeds;
+                targetSpeeds.vxMetersPerSecond = -1 * targetSpeeds.vxMetersPerSecond;
+                targetSpeeds.vyMetersPerSecond = -1 * targetSpeeds.vyMetersPerSecond;
+                targetSpeeds.omegaRadiansPerSecond = -1 * targetSpeeds.omegaRadiansPerSecond;
             }
             case teleop -> {
                 targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(teleopSpeeds,getFiledRelativeOrientationOfRobot());
@@ -305,20 +317,17 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         this.targetAngle = targetAngle;
     }
 
-    public enum DrivetrainMode
-    {
+    public enum DrivetrainMode {
         trajectory,
         teleop,
         off
     }
-    public enum YawControlMode
-    {
+    public enum YawControlMode {
         velocity,
         dpad,
         rightStick
     }
-    public enum SpeedMode
-    {
+    public enum SpeedMode {
         slow,
         normal
     }

@@ -64,6 +64,12 @@
         {
           "type": "named",
           "data": {
+            "name": "ScoreSub"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "IntakeOn"
           }
         },
@@ -71,12 +77,6 @@
           "type": "named",
           "data": {
             "name": "RevFar"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ScoreSub"
           }
         },
         {
@@ -102,12 +102,6 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "IntakeLaser"
-                }
-              },
-              {
                 "type": "sequential",
                 "data": {
                   "commands": [
@@ -120,31 +114,31 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.5
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "FourAmp.5"
+                        "waitTime": 1.0
                       }
                     }
                   ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeLaser"
                 }
               }
             ]
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "RevFar"
+            "pathName": "FourAmp.5"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Fire"
+            "name": "ScoreSub"
           }
         }
       ]

@@ -57,7 +57,7 @@ public class DrivetrainConstants
 
     public static final double MAX_ANGULAR_VELOCITY_ACCEPT_VISION_DATA = 2 * Math.PI;
 
-    public static final String LimeLightName = "limelight";
+    public static final String LimeLightName = "limelight-cam";
 
     public static final double MAX_AUTO_SPEED = 4.0;
 }

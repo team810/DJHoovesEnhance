@@ -6,4 +6,6 @@ public enum Autos {
     Middle,
     FourAmp,
     MoveStraight, // This auto is just meant to get mobility points.
+    Move,
+    ThreeNonAmp
 }

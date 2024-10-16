@@ -26,8 +26,8 @@ public class Auto {
 
     private final HashMap<Autos, Command> autos = new HashMap<>();
     public Auto() {
-        PIDConstants translationController = new PIDConstants(0, 0, 0);
-        PIDConstants rotationController = new PIDConstants(0, 0, 0);
+        PIDConstants translationController = new PIDConstants(2, 0, 0);
+        PIDConstants rotationController = new PIDConstants(2, 0, 0);
 
         ReplanningConfig replanningConfig = new ReplanningConfig(
                 true,
@@ -95,6 +95,9 @@ public class Auto {
         NamedCommands.registerCommand("IntakeLaser",
                 new SequentialCommandGroup(
                         new IntakeAutoCommand(),
+                        new InstantCommand(() -> IntakeSubsystem.getInstance().setState(IntakeStates.rev)),
+                        new WaitCommand(.02),
+                        new InstantCommand(() -> IntakeSubsystem.getInstance().setState(IntakeStates.off)),
                         new WaitCommand(5)
                 )
         );
@@ -143,6 +146,9 @@ public class Auto {
                         })
                 )
         );
+        autos.put(Autos.ThreeNonAmp,AutoBuilder.buildAuto("ThreeNonAmpSide"));
+        autos.put(Autos.Move, AutoBuilder.buildAuto("JustDrive"));
+
     }
     public Command getAuto(Autos auto)
     {

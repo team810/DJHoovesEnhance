@@ -21,6 +21,7 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/Competition/Auto": "String Chooser",
       "/Shuffleboard/Competition/Drive Mode": "String Chooser",
       "/Shuffleboard/Drivetrain/Drive Mode": "String Chooser",
       "/Shuffleboard/Drivetrain/PigeonGyro": "Gyro",

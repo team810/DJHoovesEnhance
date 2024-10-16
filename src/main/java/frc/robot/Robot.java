@@ -56,6 +56,8 @@ public class Robot extends LoggedRobot
         AutoChooser.addOption("ShootOnly", Autos.ShotOnly);
         AutoChooser.addOption("Middle",Autos.Middle);
         AutoChooser.addOption("Four Amp Side", Autos.FourAmp);
+        AutoChooser.addOption("Just Mode", Autos.Move);
+        AutoChooser.addOption("ThreeNonAmp", Autos.ThreeNonAmp);
 
         competitionTab.addBoolean("Game Piece Detected", () -> (LaserSubsystem.getInstance().getLaserState() == LaserState.Detected));
         competitionTab.add("Drive Mode", DriveMode);
@@ -196,7 +198,7 @@ public class Robot extends LoggedRobot
     public void autonomousInit()
     {
         DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.trajectory);
-        autos.getAuto(Autos.FourAmp).schedule();
+        autos.getAuto(AutoChooser.getSelected()).schedule();
 //        autonomousCommand.schedule();
     }
 

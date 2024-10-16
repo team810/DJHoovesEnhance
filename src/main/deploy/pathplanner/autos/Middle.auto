@@ -46,25 +46,6 @@
           "data": {
             "name": "AllOff"
           }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Middle.2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeLaser"
-                }
-              }
-            ]
-          }
         }
       ]
     }

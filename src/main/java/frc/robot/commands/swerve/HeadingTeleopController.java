@@ -39,10 +39,11 @@ public class HeadingTeleopController extends Command {
 
         Rotation2d heading;
 
-        xHeadingInput = IO.getJoystickValue(Controls.headingX).get();
-        yHeadingInput = IO.getJoystickValue(Controls.headingY).get();
+        xHeadingInput = -IO.getJoystickValue(Controls.headingX).get();
+        yHeadingInput = -IO.getJoystickValue(Controls.headingY).get();
         throttleInput = IO.getJoystickValue(Controls.throttle).get();
         thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();
+
 
         xHeadingInput = xHeadingInput * invert;
         yHeadingInput = yHeadingInput * invert;
