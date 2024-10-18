@@ -136,7 +136,7 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
 
         yawController = new ProfiledPIDController(15,0,1.5,new TrapezoidProfile.Constraints(DrivetrainConstants.MAX_ANGULAR_VELOCITY, DrivetrainConstants.MAX_ANGULAR_ACCELERATION), Robot.defaultPeriodSecs);
         yawController.enableContinuousInput(-Math.PI, Math.PI);
-        yawController.setTolerance(Math.toRadians(.5));
+        yawController.setTolerance(Math.toRadians(1));
 
         yawControlMode = YawControlMode.velocity;
         targetAngle = new Rotation2d();
@@ -169,9 +169,10 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
         if (Robot.isSimulation())
         {
             gyro.getSimState().addYaw(Math.toDegrees(currentSpeeds.omegaRadiansPerSecond * Robot.defaultPeriodSecs));
+            gyro.getSimState().setSupplyVoltage(4);
         }
 
-        if (true)
+        if (Robot.isReal())
         {
             boolean reject = false;
 
@@ -206,9 +207,6 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
             case trajectory ->
             {
                 targetSpeeds = trajectorySpeeds;
-                targetSpeeds.vxMetersPerSecond = -1 * targetSpeeds.vxMetersPerSecond;
-                targetSpeeds.vyMetersPerSecond = -1 * targetSpeeds.vyMetersPerSecond;
-                targetSpeeds.omegaRadiansPerSecond = -1 * targetSpeeds.omegaRadiansPerSecond;
             }
             case teleop -> {
                 targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(teleopSpeeds,getFiledRelativeOrientationOfRobot());
@@ -229,6 +227,14 @@ public class DrivetrainSubsystem extends AdvancedSubsystem {
                 targetSpeeds = new ChassisSpeeds(0,0,0);
             }
         }
+
+        if (Robot.isReal())
+        {
+            targetSpeeds.vxMetersPerSecond = -1 * targetSpeeds.vxMetersPerSecond;
+            targetSpeeds.vyMetersPerSecond = -1 * targetSpeeds.vyMetersPerSecond;
+            targetSpeeds.omegaRadiansPerSecond = -1 * targetSpeeds.omegaRadiansPerSecond;
+        }
+
 
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(targetSpeeds);
 

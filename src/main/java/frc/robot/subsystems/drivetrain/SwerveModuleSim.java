@@ -6,7 +6,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import frc.robot.Robot;
-import frc.robot.lib.Conversions;
 import org.littletonrobotics.junction.Logger;
 
 class SwerveModuleSim implements SwerveModuleIO {
@@ -27,9 +26,8 @@ class SwerveModuleSim implements SwerveModuleIO {
 
 	public SwerveModuleSim(SwerveModuleDetails details) {
 		this.details = details;
-
-//		drive = new FlywheelSim(DCMotor.getKrakenX60(1),5.36, .025);
-		drive = new FlywheelSim(DCMotor.getNEO(1),6.75, .025);
+		// .-0
+		drive = new FlywheelSim(DCMotor.getNEO(1),1, .0000005);
 		steer = new FlywheelSim(DCMotor.getNEO(1), 21.428571428571427, 0.004);
 
 		driveVoltage = 0;
@@ -44,14 +42,12 @@ class SwerveModuleSim implements SwerveModuleIO {
 	public void readPeriodic() {
 		drive.update(Robot.defaultPeriodSecs);
 		steer.update(Robot.defaultPeriodSecs);
-		wheelVelocity = drive.getAngularVelocityRPM() * DrivetrainConstants.DRIVE_GEAR_RATIO;
+		wheelVelocity = drive.getAngularVelocityRPM();
 
 		double currentSpeed =
-				(((getWheelVelocity() / DrivetrainConstants.DRIVE_GEAR_RATIO) / 60 ) * // This is the wheel gear ratio concision factor
-						((Math.PI * 4) / 12) * Robot.defaultPeriodSecs)
-				;
+				(((getWheelVelocity()/DrivetrainConstants.DRIVE_GEAR_RATIO) / 60) * Robot.defaultPeriodSecs) * DrivetrainConstants.DISTANCE_PER_REVOLUTION;
 
-		drivePosition = Conversions.toMeters(currentSpeed) + drivePosition;
+		drivePosition = currentSpeed + drivePosition;
 
 		double steerVelocity = steer.getAngularVelocityRPM();
 		steerVelocity = steerVelocity / 60; // RPM to RPS

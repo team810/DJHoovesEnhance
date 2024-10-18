@@ -28,13 +28,18 @@ public class TeleopController extends Command {
         thetaLimiter = new SlewRateLimiter(DrivetrainConstants.MAX_ANGULAR_ACCELERATION);
     }
 
-
     @Override
     public void execute() {
-        if (DriverStation.getAlliance().isPresent()) {
-            invert = -1;
+        if (DriverStation.getAlliance().isPresent())
+        {
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue)
+            {
+                invert = 1;
+            }else{
+                invert = -1;
+            }
         }else{
-            invert = 1;
+            invert = -1;
         }
 
         double xInput = -IO.getJoystickValue(Controls.drive_x).get();
@@ -51,7 +56,7 @@ public class TeleopController extends Command {
         Translation2d linerVelocityCalc = calcLinearVelocity(xInput, yInput);
 
         thetaInput = MathUtil.applyDeadband(thetaInput, .1);
-        thetaInput = Math.copySign(thetaInput * thetaInput, thetaInput);
+        thetaInput = Math.pow(thetaInput,3);
 
         if (DrivetrainSubsystem.getInstance().getSpeedMode() == DrivetrainSubsystem.SpeedMode.normal)
         {
@@ -107,6 +112,7 @@ public class TeleopController extends Command {
         }else{
             DrivetrainSubsystem.getInstance().setTargetAngle(DrivetrainSubsystem.getInstance().getFiledRelativeOrientationOfRobot());
         }
+
     }
     public static Translation2d calcLinearVelocity(double x, double y) {
         // Apply deadband
@@ -116,7 +122,7 @@ public class TeleopController extends Command {
         // Square magnitude
         linearMagnitude = linearMagnitude * linearMagnitude;
 
-        // Calcaulate new linear velocity
+        // Calculate new linear velocity
         Translation2d linearVelocity =
                 new Pose2d(new Translation2d(), linearDirection)
                         .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
@@ -125,18 +131,28 @@ public class TeleopController extends Command {
     }
     @Override
     public void initialize() {
-        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.teleop);
-        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+        if (DriverStation.getAlliance().isPresent())
+        {
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue)
+            {
+                invert = 1;
+            }else{
+                invert = -1;
+            }
+        }else{
             invert = -1;
         }
+
+        DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.teleop);
     }
 
     @Override
     public void end(boolean interrupted) {
         DrivetrainSubsystem.getInstance().setDrivetrainMode(DrivetrainSubsystem.DrivetrainMode.off);
-        System.out.println(interrupted);
     }
 
     @Override
-    public boolean isFinished() {return !RobotState.isTeleop();}
+    public boolean isFinished() {
+        return !RobotState.isTeleop();
+    }
 }

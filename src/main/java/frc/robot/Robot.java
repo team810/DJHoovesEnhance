@@ -37,6 +37,7 @@ import org.littletonrobotics.urcl.URCL;
 
 public class Robot extends LoggedRobot
 {
+
     private Command autonomousCommand;
     private final SendableChooser<DrivingMode> DriveMode = new SendableChooser<>();
     private final SendableChooser<Autos> AutoChooser = new SendableChooser<>();
@@ -45,6 +46,7 @@ public class Robot extends LoggedRobot
 
     public Robot()
     {
+        super(.020);
         ShuffleboardTab competitionTab = Shuffleboard.getTab("Competition");
 
         DriveMode.addOption("Standard", DrivingMode.Standard);
@@ -58,6 +60,7 @@ public class Robot extends LoggedRobot
         AutoChooser.addOption("Four Amp Side", Autos.FourAmp);
         AutoChooser.addOption("Just Mode", Autos.Move);
         AutoChooser.addOption("ThreeNonAmp", Autos.ThreeNonAmp);
+        AutoChooser.setDefaultOption("None", Autos.None);
 
         competitionTab.addBoolean("Game Piece Detected", () -> (LaserSubsystem.getInstance().getLaserState() == LaserState.Detected));
         competitionTab.add("Drive Mode", DriveMode);
@@ -97,7 +100,7 @@ public class Robot extends LoggedRobot
 
         setUseTiming(true);
         CommandScheduler.getInstance().unregisterAllSubsystems();
-        CommandScheduler.getInstance().setPeriod(.015);
+        CommandScheduler.getInstance().setPeriod(.020);
 
         new Trigger(IO.getButtonValue(Controls.reset_gyro)).toggleOnTrue(new InstantCommand(() -> DrivetrainSubsystem.getInstance().resetGyroButton()));
 

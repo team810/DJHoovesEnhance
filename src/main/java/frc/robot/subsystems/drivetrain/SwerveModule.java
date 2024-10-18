@@ -41,8 +41,8 @@ class SwerveModule {
 
         } else if (Robot.isSimulation()) {
 
-            velocityController = new PIDController(.001,0,0);
-            velocityFF = new SimpleMotorFeedforward(0,.002165,1);
+            velocityController = new PIDController(0,0,0);
+            velocityFF = new SimpleMotorFeedforward(0,.00218,0);
             steerController = new PIDController(5,0,0);
 
             module = new SwerveModuleSim(details);

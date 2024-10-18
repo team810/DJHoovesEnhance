@@ -40,7 +40,7 @@ public class Auto {
                 DrivetrainConstants.MAX_AUTO_SPEED,
                 DrivetrainConstants.DRIVETRAIN_TRACK_WIDTH_METERS / 2,
                 replanningConfig,
-                .020
+                .025
         );
         AutoBuilder.configureHolonomic(
                 () -> DrivetrainSubsystem.getInstance().getRobotPose(),

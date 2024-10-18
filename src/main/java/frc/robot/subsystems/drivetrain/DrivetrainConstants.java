@@ -1,5 +1,7 @@
 package frc.robot.subsystems.drivetrain;
 
+import edu.wpi.first.math.util.Units;
+
 public class DrivetrainConstants
 {
     public static final int FRONT_LEFT_DRIVE_MOTOR = 3;
@@ -42,7 +44,7 @@ public class DrivetrainConstants
      * @Unites Meters
      */
     public static final double DRIVETRAIN_WHEELBASE_METERS = 0.635; // Width of bot in meters
-    public static final double WHEEL_DIAMETER  = .1016;
+    public static final double WHEEL_DIAMETER  = Units.inchesToMeters(4);
 
     /**
      * The distance traveled for ever rotation of the wheel. PI * Wheel Diameter in inches

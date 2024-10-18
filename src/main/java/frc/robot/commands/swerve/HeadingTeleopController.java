@@ -26,10 +26,16 @@ public class HeadingTeleopController extends Command {
 
     @Override
     public void execute() {
-        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-            invert = -1;
+        if (DriverStation.getAlliance().isPresent())
+        {
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue)
+            {
+                invert = 1;
+            }else{
+                invert = -1;
+            }
         }else{
-            invert = 1;
+            invert = -1;
         }
 
         double xHeadingInput;
@@ -42,8 +48,7 @@ public class HeadingTeleopController extends Command {
         xHeadingInput = -IO.getJoystickValue(Controls.headingX).get();
         yHeadingInput = -IO.getJoystickValue(Controls.headingY).get();
         throttleInput = IO.getJoystickValue(Controls.throttle).get();
-        thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();
-
+        thetaInput = IO.getJoystickValue(Controls.drive_theta).get();
 
         xHeadingInput = xHeadingInput * invert;
         yHeadingInput = yHeadingInput * invert;
@@ -56,7 +61,6 @@ public class HeadingTeleopController extends Command {
         throttleInput = MathUtil.applyDeadband(throttleInput, .1);
         thetaInput = MathUtil.applyDeadband(thetaInput, .1);
 
-        thetaInput = Math.copySign(thetaInput * thetaInput, thetaInput);
         throttleInput = Math.pow(throttleInput, 3);
 
         heading = new Rotation2d(xHeadingInput, yHeadingInput);
