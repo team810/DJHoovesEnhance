@@ -44,7 +44,7 @@ public class TeleopController extends Command {
 
         double xInput = -IO.getJoystickValue(Controls.drive_x).get();
         double yInput = -IO.getJoystickValue(Controls.drive_y).get();
-        double thetaInput = IO.getJoystickValue(Controls.drive_theta).get();
+        double thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();
 
         xInput = xInput * invert;
         yInput = yInput * invert;
