@@ -1,0 +1,31 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.8328167200088501,
+      "y": 6.670411586761475
+    },
+    "rotation": 58.134012510455136
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreSub"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Ferry.1"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": true
+}

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.IO.Controls;
 import frc.robot.IO.IO;
+import frc.robot.Robot;
 import frc.robot.subsystems.drivetrain.DrivetrainConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 
@@ -44,7 +45,13 @@ public class TeleopController extends Command {
 
         double xInput = -IO.getJoystickValue(Controls.drive_x).get();
         double yInput = -IO.getJoystickValue(Controls.drive_y).get();
-        double thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();
+        double thetaInput = 0;
+        if (Robot.isSimulation())
+        {
+            thetaInput = -IO.getJoystickValue(Controls.drive_theta).get();
+        }else{
+            thetaInput = IO.getJoystickValue(Controls.drive_theta).get();
+        }
 
         xInput = xInput * invert;
         yInput = yInput * invert;
