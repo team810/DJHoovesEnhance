@@ -24,12 +24,12 @@ public class DrivetrainConstants
 
     // Neo with L2
     public static final double MAX_VELOCITY = 4.6; // MPS
-    public static final double MAX_ACCELERATION = 7; // MPS
+    public static final double MAX_ACCELERATION = 6.4; // MPS^2
     public static final double DRIVE_GEAR_RATIO = 6.75;
 
     // Kraken L3+
 //    public static final double MAX_VELOCITY = 5.9; // MPS
-//    public static final double MAX_ACCELERATION = 7; // MPS
+//    public static final double MAX_ACCELERATION = 9.8; // MPS
 //    public static final double DRIVE_GEAR_RATIO = 5.36;
 
     public static final double NORMAL_SPEED = 4.6;
